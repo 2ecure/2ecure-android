@@ -266,7 +266,7 @@ dependencies {
 
     // Google Play Services fused location backend. Discovered at runtime via ServiceLoader by the
     // location feature.
-    "gplayImplementation"(libs.maplibre.compose.location.runtime.gms)
+    // No fused-location backend in 2ecure v1.
 
     implementation(libs.appyx.core)
     implementation(libs.androidx.splash)
