@@ -33,8 +33,16 @@ class DefaultEnterpriseService(
 ) : EnterpriseService {
     override suspend fun isEnterpriseUser(sessionId: SessionId) = false
     override suspend fun tweakMasUrl(url: String, urlContentFetcher: ClientUrlContentFetcher) = url
-    override fun homeserverAllowList(): List<String> = emptyList()
-    override suspend fun isAllowedToConnectToHomeserver(homeserverUrl: String) = true
+    override fun homeserverAllowList(): List<String> = listOf("2ecure.com")
+    override suspend fun isAllowedToConnectToHomeserver(homeserverUrl: String): Boolean {
+        // Exact matches only: reject lookalike hosts, credentials, paths and non-HTTPS URLs.
+        // 2ecure.com delegates via /.well-known/matrix/client to https://matrix.2ecure.com.
+        return homeserverUrl.removeSuffix("/") in setOf(
+            "2ecure.com",
+            "https://2ecure.com",
+            "https://matrix.2ecure.com",
+        )
+    }
     override suspend fun isElementProEnforced(serverName: String): Boolean {
         val temporaryMatrixClient = temporaryMatrixClientFactory.create(serverName).getOrElse { return false }
         return temporaryMatrixClient.use { client ->
@@ -59,14 +67,15 @@ class DefaultEnterpriseService(
     }
 
     override fun semanticColorsFlow(sessionId: SessionId?): Flow<SemanticColorsLightDark> {
+        // TODO: Final brand colours belong in DefaultEnterpriseService.kt; retain the default semantic palette for now.
         return flowOf(SemanticColorsLightDark.default)
     }
 
-    override fun firebasePushGateway(): String? = null
+    override fun firebasePushGateway(): String = "https://push.2ecure.com/_matrix/push/v1/notify"
     override fun unifiedPushDefaultPushGateway(): String? = null
 
     override fun bugReportUrlFlow(sessionId: SessionId?): Flow<BugReportUrl> {
-        return flowOf(BugReportUrl.UseDefault)
+        return flowOf(BugReportUrl.Disabled)
     }
 
     override fun getNoisyNotificationChannelId(sessionId: SessionId): String? = null
