@@ -29,8 +29,8 @@
   <string name="screen_media_upload_preview_error_could_not_be_uploaded">"Die Datei konnte nicht hochgeladen werden."</string>
   <string name="screen_media_upload_preview_error_failed_processing">"Fehler beim Verarbeiten des hochgeladenen Mediums. Bitte versuche es erneut."</string>
   <string name="screen_media_upload_preview_error_failed_sending">"Das Hochladen der Medien ist fehlgeschlagen. Bitte versuche es erneut."</string>
-  <string name="screen_media_upload_preview_error_too_large_message">"Die maximal zulässige Dateigröße beträgt %1$s."</string>
-  <string name="screen_media_upload_preview_error_too_large_title">"Die Datei ist zu groß zum Hochladen"</string>
+  <string name="screen_media_upload_preview_error_too_large_message">"Die maximal zulässige Dateigrösse beträgt %1$s."</string>
+  <string name="screen_media_upload_preview_error_too_large_title">"Die Datei ist zu gross zum Hochladen"</string>
   <string name="screen_media_upload_preview_item_count">"%1$d von %2$d"</string>
   <string name="screen_media_upload_preview_optimize_image_quality_title">"Optimiere die Bildqualität"</string>
   <string name="screen_media_upload_preview_processing">"Verarbeitung läuft …"</string>
