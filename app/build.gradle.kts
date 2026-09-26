@@ -21,7 +21,6 @@ import extension.allLibrariesImpl
 import extension.allServicesImpl
 import extension.buildConfigFieldStr
 import extension.environmentOrGradleValue
-import extension.locales
 import extension.setupDependencyInjection
 import extension.testCommonDependencies
 import org.sonarqube.gradle.SonarResolverTask
@@ -74,7 +73,7 @@ android {
         }
 
         androidResources {
-            localeFilters += locales
+            localeFilters += listOf("en", "de", "fr", "it")
         }
     }
 

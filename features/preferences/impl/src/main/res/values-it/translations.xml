@@ -5,8 +5,8 @@
   <string name="full_screen_intent_banner_message_android">"Per non perdere mai una chiamata importante, modifica le impostazioni per consentire le notifiche a schermo intero quando il telefono è bloccato."</string>
   <string name="full_screen_intent_banner_title_android">"Migliora la tua esperienza di chiamata"</string>
   <string name="screen_advanced_settings_choose_distributor_dialog_title_android">"Scegli come ricevere le notifiche"</string>
-  <string name="screen_advanced_settings_element_call_base_url">"URL base di Element Call personalizzato"</string>
-  <string name="screen_advanced_settings_element_call_base_url_description">"Imposta un URL di base personalizzato per Element Call."</string>
+  <string name="screen_advanced_settings_element_call_base_url">"URL base di Chiamate 2ecure personalizzato"</string>
+  <string name="screen_advanced_settings_element_call_base_url_description">"Imposta un URL di base personalizzato per Chiamate 2ecure."</string>
   <string name="screen_advanced_settings_element_call_base_url_validation_error">"URL non valido, assicurati di includere il protocollo (http/https) e l\'indirizzo corretto."</string>
   <string name="screen_advanced_settings_hide_invite_avatars_toggle_title">"Nascondi gli avatar nelle richieste di invito alle stanze"</string>
   <string name="screen_advanced_settings_labs">"Labs"</string>
@@ -83,8 +83,8 @@ Se procedi, alcune delle tue impostazioni potrebbero cambiare."</string>
   <string name="screen_notification_settings_sound_custom_fallback">"Personalizzato"</string>
   <string name="screen_notification_settings_sound_custom_sound_button_title">"Suono personalizzato…"</string>
   <string name="screen_notification_settings_sound_delete_sound_error_title">"Errore durante l\'eliminazione del file"</string>
-  <string name="screen_notification_settings_sound_element_default">"Predefinito di Element"</string>
-  <string name="screen_notification_settings_sound_element_fade">"Dissolvenza di Element"</string>
+  <string name="screen_notification_settings_sound_element_default">"Predefinito di 2ecure"</string>
+  <string name="screen_notification_settings_sound_element_fade">"Dissolvenza di 2ecure"</string>
   <string name="screen_notification_settings_sound_import_sound_error_title">"Errore durante l\'importazione del file"</string>
   <string name="screen_notification_settings_sound_preview_sound_error_title">"Problema durante l\'anteprima del suono di avviso"</string>
   <string name="screen_notification_settings_sound_section_title">"Suono"</string>
