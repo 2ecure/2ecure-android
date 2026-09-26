@@ -10,29 +10,18 @@ package io.element.android.features.location.impl
 
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
-import io.element.android.features.enterprise.api.remoteconfig.CustomMapTilerConfigProvider
 import io.element.android.features.enterprise.api.remoteconfig.MapTilerConfig
 import io.element.android.features.location.api.LocationService
-import io.element.android.features.location.api.buildTimeMapTilerConfig
 import io.element.android.libraries.di.SessionScope
-import io.element.android.libraries.di.annotations.SessionCoroutineScope
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.stateIn
 
 @SingleIn(SessionScope::class)
 @ContributesBinding(SessionScope::class)
-class DefaultLocationService(
-    customMapTilerConfigProvider: CustomMapTilerConfigProvider,
-    @SessionCoroutineScope sessionCoroutineScope: CoroutineScope,
-) : LocationService {
-    override val mapTilerConfig: StateFlow<MapTilerConfig?> = flow {
-        customMapTilerConfigProvider.get().getOrNull()?.let { emit(it) }
-    }.stateIn(
-        scope = sessionCoroutineScope,
-        started = SharingStarted.Eagerly,
-        initialValue = buildTimeMapTilerConfig(),
-    )
+class DefaultLocationService : LocationService {
+    // Location sharing is off in 2ecure: no map provider, whatever the homeserver or the build configures. This
+    // capability gates the location-sharing attachment UI and map rendering.
+    override val mapTilerConfig: StateFlow<MapTilerConfig?> = MutableStateFlow(null)
+
+    override fun isServiceAvailable(): StateFlow<Boolean> = MutableStateFlow(false)
 }
