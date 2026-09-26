@@ -86,7 +86,7 @@ import org.junit.Test
 
 private const val A_PERMALINK = "https://matrix.to/#/!aRoomId:domain"
 
-private const val A_LOGIN_LINK = "https://mobile.element.io/element/?account_provider=example.com&login_hint=mxid:@alice:example.com"
+private const val A_LOGIN_LINK = "https://2ecure.com/android/?account_provider=example.com&login_hint=mxid:@alice:example.com"
 
 private val A_LOGIN_PARAMS = LoginParams(
     accountProvider = "example.com",

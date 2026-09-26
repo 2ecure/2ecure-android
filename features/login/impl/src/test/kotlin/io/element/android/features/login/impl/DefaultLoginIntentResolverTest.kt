@@ -17,7 +17,7 @@ class DefaultLoginIntentResolverTest : RobolectricTest() {
     @Test
     fun `nominal case`() {
         val sut = DefaultLoginIntentResolver()
-        val uriString = "https://mobile.element.io/element/?account_provider=example.org&login_hint=mxid:@alice:example.org"
+        val uriString = "https://2ecure.com/android/?account_provider=example.org&login_hint=mxid:@alice:example.org"
         assertThat(sut.parse(uriString)).isEqualTo(
             LoginParams(
                 accountProvider = "example.org",
@@ -29,7 +29,7 @@ class DefaultLoginIntentResolverTest : RobolectricTest() {
     @Test
     fun `extra unknown param`() {
         val sut = DefaultLoginIntentResolver()
-        val uriString = "https://mobile.element.io/element/?account_provider=example.org&login_hint=mxid:@alice:example.org&extra=uknown"
+        val uriString = "https://2ecure.com/android/?account_provider=example.org&login_hint=mxid:@alice:example.org&extra=uknown"
         assertThat(sut.parse(uriString)).isEqualTo(
             LoginParams(
                 accountProvider = "example.org",
@@ -41,7 +41,7 @@ class DefaultLoginIntentResolverTest : RobolectricTest() {
     @Test
     fun `no account provider`() {
         val sut = DefaultLoginIntentResolver()
-        val uriString = "https://mobile.element.io/element/?login_hint=mxid:@alice:example.org"
+        val uriString = "https://2ecure.com/android/?login_hint=mxid:@alice:example.org"
         assertThat(sut.parse(uriString)).isNull()
     }
 
@@ -69,7 +69,7 @@ class DefaultLoginIntentResolverTest : RobolectricTest() {
     @Test
     fun `no login_hint param`() {
         val sut = DefaultLoginIntentResolver()
-        val uriString = "https://mobile.element.io/element/?account_provider=example.org"
+        val uriString = "https://2ecure.com/android/?account_provider=example.org"
         assertThat(sut.parse(uriString)).isEqualTo(
             LoginParams(
                 accountProvider = "example.org",
