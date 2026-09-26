@@ -77,6 +77,12 @@ android {
     }
 
     signingConfigs {
+        create("upload") {
+            storeFile = providers.environmentVariable("TWOECURE_UPLOAD_STORE_FILE").orNull?.let { file(it) }
+            storePassword = providers.environmentVariable("TWOECURE_UPLOAD_STORE_PASSWORD").orNull
+            keyAlias = providers.environmentVariable("TWOECURE_UPLOAD_KEY_ALIAS").orNull
+            keyPassword = providers.environmentVariable("TWOECURE_UPLOAD_KEY_PASSWORD").orNull
+        }
         getByName("debug") {
             keyAlias = "androiddebugkey"
             keyPassword = "android"
@@ -118,7 +124,7 @@ android {
                 "login_redirect_scheme",
                 oAuthRedirectSchemeBase,
             )
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("upload")
 
             optimization {
                 enable = true
@@ -177,6 +183,26 @@ android {
             useLegacyPackaging = project.findProperty("useLegacyPackaging")?.toString()?.toBoolean()
         }
     }
+}
+
+// Release tasks must never fall back to the public upstream debug key.
+val validateTwoecureUploadSigning = tasks.register("validateTwoecureUploadSigning") {
+    doLast {
+        val required = listOf(
+            "TWOECURE_UPLOAD_STORE_FILE",
+            "TWOECURE_UPLOAD_STORE_PASSWORD",
+            "TWOECURE_UPLOAD_KEY_ALIAS",
+            "TWOECURE_UPLOAD_KEY_PASSWORD",
+        )
+        val missing = required.filter { System.getenv(it).isNullOrBlank() }
+        check(missing.isEmpty()) { "Missing release signing environment variables: ${missing.joinToString()}" }
+    }
+}
+tasks.matching {
+    (it.name.startsWith("pre") && it.name.endsWith("ReleaseBuild")) ||
+        (it.name.startsWith("validateSigning") && it.name.endsWith("Release"))
+}.configureEach {
+    dependsOn(validateTwoecureUploadSigning)
 }
 
 androidComponents {
