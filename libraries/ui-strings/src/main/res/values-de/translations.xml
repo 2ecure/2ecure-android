@@ -18,7 +18,7 @@
   <string name="a11y_edit_avatar">"Avatar bearbeiten"</string>
   <string name="a11y_edit_room_address_hint">"Die vollständige Adresse lautet %1$s"</string>
   <string name="a11y_encryption_details">"Details zur Verschlüsselung"</string>
-  <string name="a11y_expand_message_text_field">"Nachrichtentextfeld vergrößern"</string>
+  <string name="a11y_expand_message_text_field">"Nachrichtentextfeld vergrössern"</string>
   <string name="a11y_gallery_attachment">"Galerie, Anhang %1$d"</string>
   <string name="a11y_gallery_failed_scan">"Galerie, Scan %1$d fehlgeschlagen"</string>
   <string name="a11y_gallery_image">"Galerie, Bild %1$d"</string>
@@ -98,8 +98,8 @@
   <string name="action_choose_file">"Datei auswählen"</string>
   <string name="action_choose_photo">"Foto auswählen"</string>
   <string name="action_clear">"Löschen"</string>
-  <string name="action_close">"Schließen"</string>
-  <string name="action_complete_verification">"Verifizierung abschließen"</string>
+  <string name="action_close">"Schliessen"</string>
+  <string name="action_complete_verification">"Verifizierung abschliessen"</string>
   <string name="action_confirm">"Bestätigen"</string>
   <string name="action_confirm_password">"Passwort bestätigen"</string>
   <string name="action_continue">"Weiter"</string>
@@ -122,7 +122,7 @@
   <string name="action_deselect_all">"Auswahl aufheben"</string>
   <string name="action_disable">"Deaktivieren"</string>
   <string name="action_discard">"Verwerfen"</string>
-  <string name="action_dismiss">"Schließen"</string>
+  <string name="action_dismiss">"Schliessen"</string>
   <string name="action_done">"Erledigt"</string>
   <string name="action_download">"Herunterladen"</string>
   <string name="action_edit">"Bearbeiten"</string>
@@ -445,9 +445,9 @@ Grund: %1$s."</string>
   <string name="common_verify_user">"Nutzer verifizieren"</string>
   <string name="common_video">"Video"</string>
   <string name="common_video_quality_high">"Hohe Qualität"</string>
-  <string name="common_video_quality_high_description">"Beste Qualität, aber größere Dateigröße"</string>
+  <string name="common_video_quality_high_description">"Beste Qualität, aber grössere Dateigrösse"</string>
   <string name="common_video_quality_low">"Niedrige Qualität"</string>
-  <string name="common_video_quality_low_description">"Schnellste Upload-Geschwindigkeit und kleinste Dateigröße"</string>
+  <string name="common_video_quality_low_description">"Schnellste Upload-Geschwindigkeit und kleinste Dateigrösse"</string>
   <string name="common_video_quality_standard">"Standardqualität"</string>
   <string name="common_video_quality_standard_description">"Balance zwischen Qualität und Upload-Geschwindigkeit"</string>
   <string name="common_voice_message">"Sprachnachricht"</string>
@@ -477,8 +477,8 @@ Möchtest du wirklich fortfahren?"</string>
   <string name="dialog_confirm_link_title">"Überprüfe diesen Link noch einmal"</string>
   <string name="dialog_default_video_quality_selector_subtitle">"Wähle die Standardqualität für Videos, die du hochlädst."</string>
   <string name="dialog_default_video_quality_selector_title">"Video-Upload-Qualität"</string>
-  <string name="dialog_file_too_large_to_upload_subtitle">"Die maximal erlaubte Dateigröße ist: %1$s"</string>
-  <string name="dialog_file_too_large_to_upload_title">"Die Datei ist zu groß zum Hochladen"</string>
+  <string name="dialog_file_too_large_to_upload_subtitle">"Die maximal erlaubte Dateigrösse ist: %1$s"</string>
+  <string name="dialog_file_too_large_to_upload_title">"Die Datei ist zu gross zum Hochladen"</string>
   <string name="dialog_room_reported">"Chat gemeldet"</string>
   <string name="dialog_room_reported_and_left">"Gemeldet und Chat verlassen"</string>
   <string name="dialog_title_confirmation">"Bestätigung"</string>
@@ -488,7 +488,7 @@ Möchtest du wirklich fortfahren?"</string>
   <string name="dialog_unsaved_changes_description">"Du hast nicht gespeicherte Änderungen."</string>
   <string name="dialog_unsaved_changes_description_android">"Deine Änderungen wurden nicht gespeichert. Bist du sicher, dass du zurückgehen willst?"</string>
   <string name="dialog_unsaved_changes_title">"Änderungen speichern?"</string>
-  <string name="dialog_video_quality_selector_subtitle_file_size">"Die maximal erlaubte Dateigröße ist: %1$s"</string>
+  <string name="dialog_video_quality_selector_subtitle_file_size">"Die maximal erlaubte Dateigrösse ist: %1$s"</string>
   <string name="dialog_video_quality_selector_subtitle_no_file_size">"Wähle die Qualität des Videos, das du hochladen möchtest."</string>
   <string name="dialog_video_quality_selector_title">"Wähle die Video-Upload-Qualität"</string>
   <string name="error_account_already_logged_in">"Du bist auf diesem Gerät bereits als %1$s angemeldet."</string>

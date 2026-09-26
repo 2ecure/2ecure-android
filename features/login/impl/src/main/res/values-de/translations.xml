@@ -9,7 +9,7 @@
   <string name="screen_account_provider_signin_title">"Du bist dabei, dich bei %s anzumelden"</string>
   <string name="screen_account_provider_signup_subtitle">"Hier werden deine Gespräche gespeichert – so wie du deine E-Mails bei einem E-Mail-Anbieter aufbewahren würdest."</string>
   <string name="screen_account_provider_signup_title">"Du bist dabei, ein Konto bei %s zu erstellen"</string>
-  <string name="screen_change_account_provider_matrix_org_subtitle">"Matrix.org ist ein großer, kostenloser Server im öffentlichen Matrix-Netzwerk für eine sichere, dezentralisierte Kommunikation, der von der Matrix.org Foundation betrieben wird."</string>
+  <string name="screen_change_account_provider_matrix_org_subtitle">"Matrix.org ist ein grosser, kostenloser Server im öffentlichen Matrix-Netzwerk für eine sichere, dezentralisierte Kommunikation, der von der Matrix.org Foundation betrieben wird."</string>
   <string name="screen_change_account_provider_other">"Sonstige"</string>
   <string name="screen_change_account_provider_subtitle">"Verwende einen anderen Kontoanbieter, z. B. deinen eigenen privaten Server oder ein Geschäftskonto."</string>
   <string name="screen_change_account_provider_title">"Kontoanbieter wechseln"</string>
