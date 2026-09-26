@@ -18,7 +18,7 @@
   <string name="screen_room_details_error_loading_notification_settings">"Beim Laden der Benachrichtigungseinstellungen ist ein Fehler aufgetreten."</string>
   <string name="screen_room_details_error_muting">"Die Stummschaltung ist fehlgeschlagen, bitte versuche es erneut."</string>
   <string name="screen_room_details_error_unmuting">"Die Deaktivierung der Stummschaltung ist fehlgeschlagen, bitte versuche es erneut."</string>
-  <string name="screen_room_details_invite_people_dont_close">"Schließ die App erst, wenn du fertig bist."</string>
+  <string name="screen_room_details_invite_people_dont_close">"Schliess die App erst, wenn du fertig bist."</string>
   <string name="screen_room_details_invite_people_preparing">"Einladungen werden vorbereitet …"</string>
   <string name="screen_room_details_invite_people_title">"Personen einladen"</string>
   <string name="screen_room_details_invite_title">"Einladen"</string>
@@ -68,7 +68,7 @@
   <string name="screen_room_member_list_room_members_header_title">"Mitglieder"</string>
   <string name="screen_room_member_list_unbanning_user">"Die Sperre für %1$s wird aufgehoben"</string>
   <string name="screen_room_notification_settings_allow_custom">"Benutzerdefinierte Einstellungen verwenden"</string>
-  <string name="screen_room_notification_settings_allow_custom_footnote">"Wenn du dies einschaltest, werden deine Standardeinstellungen außer Kraft gesetzt"</string>
+  <string name="screen_room_notification_settings_allow_custom_footnote">"Wenn du dies einschaltest, werden deine Standardeinstellungen ausser Kraft gesetzt"</string>
   <string name="screen_room_notification_settings_custom_settings_title">"Benachrichtige mich in diesem Chat bei"</string>
   <string name="screen_room_notification_settings_default_setting_footnote">"Zum Anpassen der Standardeinstellungen gehe zu: %1$s."</string>
   <string name="screen_room_notification_settings_default_setting_footnote_content_link">"Globale Einstellungen"</string>

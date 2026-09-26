@@ -22,7 +22,7 @@
   <string name="screen_room_change_role_administrators_title">"Admins bearbeiten"</string>
   <string name="screen_room_change_role_confirm_add_admin_description">"Du kannst diese Aktion nicht mehr rückgängig machen. Du vergibst dieselbe Rolle, die du auch hast."</string>
   <string name="screen_room_change_role_confirm_add_admin_title">"Als Admin hinzufügen?"</string>
-  <string name="screen_room_change_role_confirm_change_owners_description">"Du kannst diese Aktion nicht rückgängig machen. Du überträgst die Eigentumsrechte an die ausgewählten Nutzer. Sobald du diesen Vorgang abschließt, ist er endgültig."</string>
+  <string name="screen_room_change_role_confirm_change_owners_description">"Du kannst diese Aktion nicht rückgängig machen. Du überträgst die Eigentumsrechte an die ausgewählten Nutzer. Sobald du diesen Vorgang abschliesst, ist er endgültig."</string>
   <string name="screen_room_change_role_confirm_change_owners_title">"Eigentumsrechte übertragen?"</string>
   <string name="screen_room_change_role_confirm_demote_self_action">"Zurückstufen"</string>
   <string name="screen_room_change_role_confirm_demote_self_description">"Du stufst dich selbst herab. Diese Änderung kann nicht rückgängig gemacht werden. Wenn du der letzte Nutzer mit dieser Rolle bist, ist es nicht möglich, diese Rolle wiederzuerlangen."</string>

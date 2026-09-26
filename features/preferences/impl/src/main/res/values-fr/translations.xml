@@ -5,8 +5,8 @@
   <string name="full_screen_intent_banner_message_android">"Afin de ne jamais manquer un appel important, veuillez modifier vos paramètres pour autoriser les notifications en plein écran lorsque votre appareil est verrouillé."</string>
   <string name="full_screen_intent_banner_title_android">"Améliorez votre expérience d’appel"</string>
   <string name="screen_advanced_settings_choose_distributor_dialog_title_android">"Choisissez le mode de réception des notifications"</string>
-  <string name="screen_advanced_settings_element_call_base_url">"URL de base pour Appels 2ecure personnalisée"</string>
-  <string name="screen_advanced_settings_element_call_base_url_description">"Configurer une URL de base pour Appels 2ecure."</string>
+  <string name="screen_advanced_settings_element_call_base_url">"URL de base personnalisée pour les appels 2ecure"</string>
+  <string name="screen_advanced_settings_element_call_base_url_description">"Configurer une URL de base pour les appels 2ecure."</string>
   <string name="screen_advanced_settings_element_call_base_url_validation_error">"URL invalide, assurez-vous d’inclure le protocol (http/https) et l’adresse correcte."</string>
   <string name="screen_advanced_settings_hide_invite_avatars_toggle_title">"Masquer les avatars des salons dans les invitations"</string>
   <string name="screen_advanced_settings_labs">"Expérimental"</string>
