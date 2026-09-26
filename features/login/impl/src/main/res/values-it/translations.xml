@@ -14,8 +14,8 @@
   <string name="screen_change_account_provider_subtitle">"Utilizza un provider di account diverso, ad esempio il tuo server privato o un account di lavoro."</string>
   <string name="screen_change_account_provider_title">"Cambia fornitore dell\'account"</string>
   <string name="screen_change_server_error_element_pro_required_action_android">"Google Play"</string>
-  <string name="screen_change_server_error_element_pro_required_message">"L\'app Element Pro è necessaria su %1$s. Scaricala dallo store."</string>
-  <string name="screen_change_server_error_element_pro_required_title">"Element Pro è richiesto"</string>
+  <string name="screen_change_server_error_element_pro_required_message">"È richiesta un’altra app su %1$s. Contatta l’amministratore del servizio."</string>
+  <string name="screen_change_server_error_element_pro_required_title">"Altra app richiesta"</string>
   <string name="screen_change_server_error_invalid_homeserver">"Non è stato possibile contattare il gestorehomeserver di questo account. Verifica di aver inserito correttamente l\'URL dell\'homeserver. Se l\'URL è corretto, contatta il gestore del tuo account per ulteriore assistenza."</string>
   <string name="screen_change_server_error_invalid_well_known">"Il server non è disponibile per un problema nel file well-known:
 %1$s"</string>
@@ -45,8 +45,8 @@
   <string name="screen_login_subtitle">"Matrix è una rete aperta per comunicazioni sicure e decentralizzate."</string>
   <string name="screen_login_title">"Bentornato!"</string>
   <string name="screen_login_title_with_homeserver">"Accedi a %1$s"</string>
-  <string name="screen_missing_key_backup_open_element_classic">"Apri Element Classic"</string>
-  <string name="screen_missing_key_backup_step_1">"Apri Element Classic sul tuo dispositivo"</string>
+  <string name="screen_missing_key_backup_open_element_classic">"Apri la tua app precedente"</string>
+  <string name="screen_missing_key_backup_step_1">"Apri la tua app precedente sul dispositivo"</string>
   <string name="screen_missing_key_backup_step_2_android">"Vai su Impostazioni &gt; Sicurezza &amp; privacy"</string>
   <string name="screen_missing_key_backup_step_3_android">"Nella gestione delle chiavi crittografiche, seleziona Recupero dei messaggi cifrati"</string>
   <string name="screen_missing_key_backup_step_4">"Segui le istruzioni per abilitare l\'archiviazione delle chiavi"</string>
@@ -61,7 +61,7 @@
   <string name="screen_onboarding_welcome_back">"Bentornato"</string>
   <string name="screen_onboarding_welcome_message">"Benvenuti nell\'%1$s più veloce di sempre. Potenziato per velocità e semplicità."</string>
   <string name="screen_onboarding_welcome_subtitle">"Benvenuto su %1$s. Potenziato in velocità e semplicità."</string>
-  <string name="screen_onboarding_welcome_title">"Sii nel tuo elemento"</string>
+  <string name="screen_onboarding_welcome_title">"Benvenuto su 2ecure"</string>
   <string name="screen_qr_code_login_connecting_subtitle">"Stabilendo la connessione"</string>
   <string name="screen_qr_code_login_connection_note_secure_state_description">"Non è stato possibile stabilire una connessione sicura con il nuovo dispositivo. I tuoi dispositivi esistenti sono ancora al sicuro e non devi preoccuparti di loro."</string>
   <string name="screen_qr_code_login_connection_note_secure_state_list_header">"E adesso?"</string>
@@ -108,7 +108,7 @@ Prova ad accedere manualmente o scansiona il codice QR con un altro dispositivo.
   <string name="screen_qr_code_login_verify_code_subtitle">"Il fornitore dell\'account potrebbe richiedere il seguente codice per verificare l\'accesso."</string>
   <string name="screen_qr_code_login_verify_code_title">"Il tuo codice di verifica"</string>
   <string name="screen_server_confirmation_change_server">"Cambia fornitore dell\'account"</string>
-  <string name="screen_server_confirmation_message_login_element_dot_io">"Un server privato per i dipendenti di Element."</string>
+  <string name="screen_server_confirmation_message_login_element_dot_io">"Un server privato."</string>
   <string name="screen_server_confirmation_message_login_matrix_dot_org">"Matrix è una rete aperta per comunicazioni sicure e decentralizzate."</string>
   <string name="screen_server_confirmation_message_register">"Qui è dove vivranno le tue conversazioni — proprio come useresti un fornitore di posta elettronica per conservare le tue email."</string>
   <string name="screen_server_confirmation_title_login">"Stai per accedere a %1$s"</string>
