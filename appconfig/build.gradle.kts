@@ -25,7 +25,7 @@ android {
             value = if (isEnterpriseBuild) {
                 BuildTimeConfig.URL_POLICY ?: ""
             } else {
-                "https://element.io/cookie-policy"
+                "https://2ecure.com/datenschutz"
             },
         )
         buildConfigFieldStr(
@@ -33,7 +33,7 @@ android {
             value = if (isEnterpriseBuild) {
                 BuildTimeConfig.BUG_REPORT_URL ?: ""
             } else {
-                "https://rageshakes.element.io/api/submit"
+                ""
             },
         )
         buildConfigFieldStr(
