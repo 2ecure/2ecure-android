@@ -259,6 +259,17 @@ private fun ColumnScope.ManageAccountSection(
             onClick = { onManageAccountClick(url) },
         )
     }
+    // OAuth/MAS cannot use the native deactivation API. Use the same Custom Tab
+    // callback as account management; MAS handles confirmation and deletion.
+    if (state.accountManagementUrl != null && !state.canDeactivateAccount) {
+        ListItem(
+            content = { Text(stringResource(id = R.string.twoecure_delete_account)) },
+            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Delete())),
+            trailingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.PopOut())),
+            style = ListItemStyle.Destructive,
+            onClick = { onManageAccountClick("https://account.2ecure.com/account/") },
+        )
+    }
     if (state.showLinkNewDevice) {
         ListItem(
             content = { Text(stringResource(id = CommonStrings.common_link_new_device)) },
