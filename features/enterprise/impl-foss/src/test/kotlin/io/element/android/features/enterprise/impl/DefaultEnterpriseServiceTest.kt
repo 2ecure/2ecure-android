@@ -14,6 +14,7 @@ import io.element.android.compound.colors.SemanticColorsLightDark
 import io.element.android.features.enterprise.api.BugReportUrl
 import io.element.android.libraries.androidutils.json.JsonProvider
 import io.element.android.libraries.core.uri.ensureProtocol
+import io.element.android.libraries.matrix.api.accountprovider.AccountProvider
 import io.element.android.libraries.matrix.test.A_HOMESERVER_URL
 import io.element.android.libraries.matrix.test.A_SESSION_ID
 import io.element.android.libraries.matrix.test.FakeTemporaryMatrixClient
@@ -29,19 +30,25 @@ class DefaultEnterpriseServiceTest {
     @Test
     fun accountProviderAllowList() {
         val defaultEnterpriseService = createDefaultEnterpriseService()
-        assertThat(defaultEnterpriseService.accountProviderAllowList()).isEmpty()
+        assertThat(defaultEnterpriseService.accountProviderAllowList())
+            .containsExactly(DefaultEnterpriseService.TWOECURE_ACCOUNT_PROVIDER)
+        assertThat(defaultEnterpriseService.canConnectToAnyAccountProvider()).isFalse()
     }
 
     @Test
-    fun `canConnectToAnyAccountProvider is always true`() {
+    fun `only the 2ecure provider and delegated HTTPS base URL are allowed`() = runTest {
         val defaultEnterpriseService = createDefaultEnterpriseService()
-        assertThat(defaultEnterpriseService.canConnectToAnyAccountProvider()).isTrue()
-    }
-
-    @Test
-    fun `isAllowedToConnectToAccountProvider is true for all account providers`() = runTest {
-        val defaultEnterpriseService = createDefaultEnterpriseService()
-        assertThat(defaultEnterpriseService.isAllowedToConnectToAccountProvider(anAccountProviderGeneric())).isTrue()
+        listOf("2ecure.com", "https://2ecure.com/", "https://matrix.2ecure.com/").forEach {
+            assertThat(defaultEnterpriseService.isAllowedToConnectToAccountProvider(AccountProvider.Generic(it))).isTrue()
+        }
+        assertThat(defaultEnterpriseService.isAllowedToConnectToAccountProvider(DefaultEnterpriseService.TWOECURE_ACCOUNT_PROVIDER)).isTrue()
+        listOf(
+            A_HOMESERVER_URL, "https://2ecure.com.attacker.org", "http://2ecure.com",
+            "https://2ecure.com@attacker.org", "https://2ecure.com/path", "https://matrix.org",
+        ).forEach {
+            assertThat(defaultEnterpriseService.isAllowedToConnectToAccountProvider(AccountProvider.Generic(it))).isFalse()
+        }
+        assertThat(defaultEnterpriseService.isAllowedToConnectToAccountProvider(anAccountProviderGeneric())).isFalse()
     }
 
     @Test
@@ -87,9 +94,9 @@ class DefaultEnterpriseServiceTest {
     }
 
     @Test
-    fun `firebasePushGateway returns null`() = runTest {
+    fun `firebasePushGateway uses 2ecure`() = runTest {
         val defaultEnterpriseService = createDefaultEnterpriseService()
-        assertThat(defaultEnterpriseService.firebasePushGateway()).isNull()
+        assertThat(defaultEnterpriseService.firebasePushGateway()).isEqualTo("https://push.2ecure.com/_matrix/push/v1/notify")
     }
 
     @Test
@@ -99,10 +106,10 @@ class DefaultEnterpriseServiceTest {
     }
 
     @Test
-    fun `bugReportUrlFlow only emits UseDefault`() = runTest {
+    fun `bugReportUrlFlow only emits Disabled`() = runTest {
         val defaultEnterpriseService = createDefaultEnterpriseService()
         defaultEnterpriseService.bugReportUrlFlow(A_SESSION_ID).test {
-            assertThat(awaitItem()).isEqualTo(BugReportUrl.UseDefault)
+            assertThat(awaitItem()).isEqualTo(BugReportUrl.Disabled)
             awaitComplete()
         }
     }

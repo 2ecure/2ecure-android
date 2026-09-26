@@ -34,9 +34,15 @@ class DefaultEnterpriseService(
 ) : EnterpriseService {
     override suspend fun isEnterpriseUser(sessionId: SessionId) = false
     override suspend fun tweakMasUrl(url: String, urlContentFetcher: ClientUrlContentFetcher) = url
-    override fun accountProviderAllowList(): List<AccountProvider> = emptyList()
-    override fun canConnectToAnyAccountProvider(): Boolean = true
-    override suspend fun isAllowedToConnectToAccountProvider(accountProvider: AccountProvider) = true
+    override fun accountProviderAllowList(): List<AccountProvider> = listOf(TWOECURE_ACCOUNT_PROVIDER)
+    override fun canConnectToAnyAccountProvider(): Boolean = false
+    override suspend fun isAllowedToConnectToAccountProvider(accountProvider: AccountProvider): Boolean {
+        // Exact matches only (AccountProvider.matches ignores case, an https:// prefix and a trailing slash): rejects
+        // lookalike hosts, credentials, paths and plain http. 2ecure.com delegates via /.well-known/matrix/client
+        // to https://matrix.2ecure.com, which is accepted too.
+        return accountProvider.matches(TWOECURE_ACCOUNT_PROVIDER) ||
+            accountProvider.matches(AccountProvider.Generic(TWOECURE_ACCOUNT_PROVIDER.baseUrl))
+    }
     override suspend fun isElementProEnforced(serverName: String): Boolean {
         val temporaryMatrixClient = temporaryMatrixClientFactory.create(serverName).getOrElse { return false }
         return temporaryMatrixClient.use { client ->
@@ -61,17 +67,26 @@ class DefaultEnterpriseService(
     }
 
     override fun semanticColorsFlow(sessionId: SessionId?): Flow<SemanticColorsLightDark> {
+        // TODO: Final brand colours belong in DefaultEnterpriseService.kt; retain the default semantic palette for now.
         return flowOf(SemanticColorsLightDark.default)
     }
 
-    override fun firebasePushGateway(): String? = null
+    override fun firebasePushGateway(): String = "https://push.2ecure.com/_matrix/push/v1/notify"
     override fun unifiedPushDefaultPushGateway(): String? = null
 
     override fun bugReportUrlFlow(sessionId: SessionId?): Flow<BugReportUrl> {
-        return flowOf(BugReportUrl.UseDefault)
+        return flowOf(BugReportUrl.Disabled)
     }
 
     override fun getNoisyNotificationChannelId(sessionId: SessionId): String? = null
+
+    companion object {
+        val TWOECURE_ACCOUNT_PROVIDER = AccountProvider.Managed(
+            serverName = "2ecure.com",
+            baseUrl = "https://matrix.2ecure.com",
+            canUseServerName = true,
+        )
+    }
 }
 
 /**
