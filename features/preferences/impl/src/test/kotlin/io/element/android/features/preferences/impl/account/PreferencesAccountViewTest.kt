@@ -29,6 +29,24 @@ import org.junit.Test
 
 class PreferencesAccountViewTest : RobolectricTest() {
     @Test
+    fun `OAuth delete account opens the MAS account page`() = runAndroidComposeUiTest {
+        ensureCalledOnceWithParam("https://account.2ecure.com/account/") { callback ->
+            setView(
+                aPreferencesAccountState(accountManagementUrl = "https://account.2ecure.com/", canDeactivateAccount = false),
+                onManageAccountClick = callback,
+            )
+            clickOn(R.string.twoecure_delete_account)
+        }
+    }
+
+    @Test
+    fun `native deactivation does not also show the OAuth delete row`() = runAndroidComposeUiTest {
+        setView(aPreferencesAccountState(accountManagementUrl = "https://account.2ecure.com/", canDeactivateAccount = true))
+        // There is still exactly one native delete row (the two resources share the English text).
+        onNodeWithText(activity!!.getString(CommonStrings.action_delete_account)).assertExists()
+    }
+
+    @Test
     fun `click on Manage account invokes the expected callback`() = runAndroidComposeUiTest {
         ensureCalledOnceWithParam("aUrl") { callback ->
             setView(
