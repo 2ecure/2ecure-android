@@ -1,0 +1,148 @@
+# 2ecure Messenger for Android: signed release APK (for direct installation) and App Bundle (for Google Play).
+# Manual dispatch only. Secrets: TWOECURE_UPLOAD_KEYSTORE_B64 (PKCS12 upload keystore, alias "upload"),
+# TWOECURE_UPLOAD_STORE_PASSWORD (store and key password), GOOGLE_SERVICES_JSON (the owner's Firebase client
+# configuration; without it the Firebase values stay REPLACE_ME placeholders and the build has no push).
+name: 2ecure Android release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bundle:
+        description: "Also build the App Bundle for Google Play (with the R8 mapping)"
+        type: boolean
+        default: false
+      build_number:
+        description: "2ecure build number within this Element X release, 0..99: version code = upstream code * 100 + this. Raise it for every Play upload."
+        type: number
+        default: 0
+
+permissions:
+  contents: read
+
+concurrency:
+  group: 2ecure-android-release
+  cancel-in-progress: false
+
+env:
+  # Private-repository runners have less memory than Element's public ones (upstream: -Xmx8g in gradle.properties).
+  GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8 -XX:+UseG1GC"
+  GRADLE_ARGS: --stacktrace --no-daemon --no-configuration-cache --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process -Dsonar.gradle.skipCompile=true -Ptwoecure.buildNumber=${{ inputs.build_number }}
+
+jobs:
+  gplay:
+    name: Signed APK and App Bundle (gplay)
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
+        with:
+          tool-cache: true
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: false
+
+      - name: Extra swap
+        run: |
+          sudo fallocate -l 8G /mnt/2ecure.swap
+          sudo chmod 600 /mnt/2ecure.swap
+          sudo mkswap /mnt/2ecure.swap >/dev/null
+          sudo swapon /mnt/2ecure.swap
+          nproc; free -h; df -h / /mnt
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          lfs: false
+
+      - name: JDK 21
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Gradle
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+
+      - name: Upload keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.TWOECURE_UPLOAD_KEYSTORE_B64 }}
+        run: |
+          printf '%s' "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload.p12"
+          echo "TWOECURE_UPLOAD_STORE_FILE=$RUNNER_TEMP/upload.p12" >> "$GITHUB_ENV"
+
+      # Push: the owner's Firebase client configuration (google-services.json) as a secret, written into the four
+      # firebase.xml resources by the patch set's own script. Never committed; without it the build has no push.
+      - name: Firebase configuration (push)
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -z "$GOOGLE_SERVICES_JSON" ]; then echo "::warning::GOOGLE_SERVICES_JSON is not set: building without push"; exit 0; fi
+          printf '%s' "$GOOGLE_SERVICES_JSON" > "$RUNNER_TEMP/google-services.json"
+          python3 .github/scripts/configure_firebase.py "$RUNNER_TEMP/google-services.json" .
+          rm -f "$RUNNER_TEMP/google-services.json"
+
+      # The 2ecure patches with their own tests: sign-in (0019, provisioning links), enterprise service (0005, 0018),
+      # web client share links (0021) and the «Delete account» row of the account settings (0010, 0015).
+      - name: Unit tests (sign-in, enterprise service, share links, delete account)
+        run: ./gradlew :features:login:impl:testDebugUnitTest :features:enterprise:impl-foss:testDebugUnitTest :libraries:matrix:api:testDebugUnitTest :features:preferences:impl:testDebugUnitTest --tests '*.PreferencesAccountViewTest' $GRADLE_ARGS
+
+      - name: Build APKs
+        env:
+          TWOECURE_UPLOAD_KEY_ALIAS: upload
+          TWOECURE_UPLOAD_STORE_PASSWORD: ${{ secrets.TWOECURE_UPLOAD_STORE_PASSWORD }}
+          TWOECURE_UPLOAD_KEY_PASSWORD: ${{ secrets.TWOECURE_UPLOAD_STORE_PASSWORD }}
+        # Alone (no bundle task in the same invocation) the ABI splits are on: one APK per ABI plus a universal
+        # one (335 MB, every ABI's native libraries).
+        run: ./gradlew assembleGplayRelease $GRADLE_ARGS
+
+      - name: Build App Bundle
+        if: inputs.bundle
+        env:
+          TWOECURE_UPLOAD_KEY_ALIAS: upload
+          TWOECURE_UPLOAD_STORE_PASSWORD: ${{ secrets.TWOECURE_UPLOAD_STORE_PASSWORD }}
+          TWOECURE_UPLOAD_KEY_PASSWORD: ${{ secrets.TWOECURE_UPLOAD_STORE_PASSWORD }}
+        run: ./gradlew bundleGplayRelease $GRADLE_ARGS
+
+      - name: Check outputs
+        run: |
+          ls -l app/build/outputs/apk/gplay/release/
+          APK=$(ls app/build/outputs/apk/gplay/release/*arm64-v8a*.apk)
+          # The Android Gradle plugin installs the SDK platform and build-tools it needs (as upstream CI relies on).
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          echo "build-tools: $BT"
+          "$BT/aapt2" dump badging "$APK" | grep -E "^package:|^application-label:|dkVersion|^native-code" || true
+          # Patch 0022: the bundle and every APK carry upstream code * 100 + build_number.
+          "$BT/aapt2" dump badging "$APK" | grep -q "versionCode='[0-9]*$(printf '%02d' '${{ inputs.build_number }}')'" \
+            || { echo "::error::version code does not end in build number ${{ inputs.build_number }}"; exit 1; }
+          "$BT/apksigner" verify "$APK"
+          "$BT/apksigner" verify --print-certs "$APK" | grep -i "certificate" || true
+          mkdir -p out
+          cp "$APK" out/2ecure-${{ github.run_number }}-arm64.apk
+          AAB=app/build/outputs/bundle/gplayRelease/app-gplay-release.aab
+          if [ -f "$AAB" ]; then ls -l "$AAB"; cp "$AAB" out/2ecure-${{ github.run_number }}.aab; fi
+
+      # Artifacts count against the organisation's 500 MB Actions storage: arm64 APK only, short retention.
+      - name: APK (arm64-v8a, for direct installation)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: 2ecure-android-apk-${{ github.run_number }}
+          path: out/*.apk
+          retention-days: 14
+
+      - name: App Bundle and R8 mapping
+        if: inputs.bundle
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: 2ecure-android-aab-${{ github.run_number }}
+          path: |
+            out/*.aab
+            app/build/outputs/mapping/gplayRelease/mapping.txt
+          retention-days: 14
+
+      - name: Clean up keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/upload.p12"
