@@ -28,5 +28,5 @@ object NotificationConfig {
     const val SHOW_QUICK_REPLY_ACTION = true
 
     @ColorInt
-    val NOTIFICATION_ACCENT_COLOR: Int = "#FF0B5FFF".toColorInt()
+    val NOTIFICATION_ACCENT_COLOR: Int = "#FF1B1D22".toColorInt()
 }
