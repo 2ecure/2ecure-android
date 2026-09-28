@@ -58,12 +58,31 @@ class DefaultEnterpriseServiceTest {
     }
 
     @Test
-    fun `semanticColorsFlow always emits the same value`() = runTest {
+    fun `semanticColorsFlow always emits the 2ecure colours`() = runTest {
         val defaultEnterpriseService = createDefaultEnterpriseService()
         defaultEnterpriseService.semanticColorsFlow(null).test {
             val initialState = awaitItem()
-            assertThat(initialState).isEqualTo(SemanticColorsLightDark.default)
+            assertThat(initialState).isEqualTo(twoecureSemanticColors)
             awaitComplete()
+        }
+    }
+
+    @Test
+    fun `2ecure colours replace every green accent with a neutral`() {
+        listOf(
+            twoecureSemanticColors.light to SemanticColorsLightDark.default.light,
+            twoecureSemanticColors.dark to SemanticColorsLightDark.default.dark,
+        ).forEach { (colors, default) ->
+            assertThat(colors.iconAccentPrimary).isEqualTo(default.iconPrimary)
+            assertThat(colors.iconAccentTertiary).isEqualTo(default.iconPrimary)
+            assertThat(colors.textActionAccent).isEqualTo(default.textActionPrimary)
+            assertThat(colors.bgAccentRest).isEqualTo(default.bgActionPrimaryRest)
+            assertThat(colors.gradientActionStop1).isEqualTo(default.bgActionPrimaryRest)
+            assertThat(colors.gradientActionStop4).isEqualTo(default.bgActionPrimaryRest)
+            // Everything that is not an accent stays as Compound defines it.
+            assertThat(colors.textPrimary).isEqualTo(default.textPrimary)
+            assertThat(colors.textCriticalPrimary).isEqualTo(default.textCriticalPrimary)
+            assertThat(colors.iconSuccessPrimary).isEqualTo(default.iconSuccessPrimary)
         }
     }
 
@@ -82,7 +101,7 @@ class DefaultEnterpriseServiceTest {
         val defaultEnterpriseService = createDefaultEnterpriseService()
         defaultEnterpriseService.semanticColorsFlow(A_SESSION_ID).test {
             val initialState = awaitItem()
-            assertThat(initialState).isEqualTo(SemanticColorsLightDark.default)
+            assertThat(initialState).isEqualTo(twoecureSemanticColors)
             awaitComplete()
         }
     }

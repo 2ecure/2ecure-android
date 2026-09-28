@@ -11,7 +11,13 @@ package io.element.android.features.enterprise.impl
 import androidx.compose.ui.graphics.Color
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
+import io.element.android.compound.annotations.CoreColorToken
 import io.element.android.compound.colors.SemanticColorsLightDark
+import io.element.android.compound.tokens.generated.SemanticColors
+import io.element.android.compound.tokens.generated.compoundColorsDark
+import io.element.android.compound.tokens.generated.compoundColorsLight
+import io.element.android.compound.tokens.generated.internal.DarkColorTokens
+import io.element.android.compound.tokens.generated.internal.LightColorTokens
 import io.element.android.features.enterprise.api.BugReportUrl
 import io.element.android.features.enterprise.api.EnterpriseService
 import io.element.android.libraries.androidutils.json.JsonProvider
@@ -67,8 +73,7 @@ class DefaultEnterpriseService(
     }
 
     override fun semanticColorsFlow(sessionId: SessionId?): Flow<SemanticColorsLightDark> {
-        // TODO: Final brand colours belong in DefaultEnterpriseService.kt; retain the default semantic palette for now.
-        return flowOf(SemanticColorsLightDark.default)
+        return flowOf(twoecureSemanticColors)
     }
 
     override fun firebasePushGateway(): String = "https://push.2ecure.com/_matrix/push/v1/notify"
@@ -88,6 +93,58 @@ class DefaultEnterpriseService(
         )
     }
 }
+
+/**
+ * 2ecure is black and white. Compound's green accent tokens take the neutral values Compound itself uses for
+ * primary text, icons and actions, and the green gradients become solid or grey, so both themes stay consistent.
+ */
+@OptIn(CoreColorToken::class)
+internal val twoecureSemanticColors = SemanticColorsLightDark(
+    light = compoundColorsLight.withNeutralAccents(
+        LightColorTokens.colorAlphaGray500,
+        LightColorTokens.colorAlphaGray400,
+        LightColorTokens.colorAlphaGray300,
+        LightColorTokens.colorAlphaGray200,
+        LightColorTokens.colorAlphaGray100,
+    ),
+    dark = compoundColorsDark.withNeutralAccents(
+        DarkColorTokens.colorAlphaGray500,
+        DarkColorTokens.colorAlphaGray400,
+        DarkColorTokens.colorAlphaGray300,
+        DarkColorTokens.colorAlphaGray200,
+        DarkColorTokens.colorAlphaGray100,
+    ),
+)
+
+private fun SemanticColors.withNeutralAccents(
+    alpha500: Color,
+    alpha400: Color,
+    alpha300: Color,
+    alpha200: Color,
+    alpha100: Color,
+) = copy(
+    bgAccentRest = bgActionPrimaryRest,
+    bgAccentHovered = bgActionPrimaryHovered,
+    bgAccentPressed = bgActionPrimaryPressed,
+    bgAccentSelected = alpha300,
+    bgAccentSubtle = bgSubtleSecondary,
+    bgBadgeAccent = bgSubtleSecondary,
+    borderAccentPrimary = iconPrimary,
+    borderAccentSubtle = borderInteractiveSecondary,
+    iconAccentPrimary = iconPrimary,
+    iconAccentTertiary = iconPrimary,
+    textActionAccent = textActionPrimary,
+    textBadgeAccent = textPrimary,
+    gradientActionStop1 = bgActionPrimaryRest,
+    gradientActionStop2 = bgActionPrimaryRest,
+    gradientActionStop3 = bgActionPrimaryRest,
+    gradientActionStop4 = bgActionPrimaryRest,
+    gradientSubtleStop1 = alpha500,
+    gradientSubtleStop2 = alpha400,
+    gradientSubtleStop3 = alpha300,
+    gradientSubtleStop4 = alpha200,
+    gradientSubtleStop5 = alpha100,
+)
 
 /**
  * A minimal version of the enterprise config that only contains the fields we need to check if Element Pro is enforced.
