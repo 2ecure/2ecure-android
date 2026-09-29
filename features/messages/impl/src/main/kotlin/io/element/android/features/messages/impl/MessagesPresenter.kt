@@ -78,6 +78,7 @@ import io.element.android.libraries.matrix.api.core.toThreadId
 import io.element.android.libraries.matrix.api.encryption.EncryptionService
 import io.element.android.libraries.matrix.api.encryption.identity.IdentityState
 import io.element.android.libraries.matrix.api.permalink.PermalinkParser
+import io.element.android.libraries.matrix.api.permalink.WebClientLinks
 import io.element.android.libraries.matrix.api.room.JoinedRoom
 import io.element.android.libraries.matrix.api.room.RoomInfo
 import io.element.android.libraries.matrix.api.room.RoomMembersState
@@ -634,7 +635,7 @@ class MessagesPresenter(
         event.eventId ?: return
         room.getPermalinkFor(event.eventId).fold(
             onSuccess = { permalink ->
-                clipboardHelper.copyPlainText(permalink)
+                clipboardHelper.copyPlainText(WebClientLinks.fromMatrixTo(permalink))
                 snackbarDispatcher.post(SnackbarMessage(CommonStrings.common_link_copied_to_clipboard))
             },
             onFailure = {

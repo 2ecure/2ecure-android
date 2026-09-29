@@ -30,6 +30,7 @@ import io.element.android.libraries.architecture.callback
 import io.element.android.libraries.di.RoomScope
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.notification.CallIntent
+import io.element.android.libraries.matrix.api.permalink.WebClientLinks
 import io.element.android.libraries.matrix.api.room.BaseRoom
 import io.element.android.services.analytics.api.AnalyticsService
 import kotlinx.coroutines.CoroutineScope
@@ -83,7 +84,7 @@ class RoomDetailsNode(
                 context.startSharePlainTextIntent(
                     activityResultLauncher = null,
                     chooserTitle = context.getString(R.string.screen_room_details_share_room_title),
-                    text = permalink,
+                    text = WebClientLinks.fromMatrixTo(permalink),
                     noActivityFoundMessage = context.getString(AndroidUtilsR.string.error_no_compatible_app_found)
                 )
             }
