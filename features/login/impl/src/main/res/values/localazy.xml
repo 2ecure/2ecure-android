@@ -59,7 +59,7 @@
   <string name="screen_onboarding_sign_in_with_qr_code">"Sign in with QR code"</string>
   <string name="screen_onboarding_sign_up">"Create account"</string>
   <string name="screen_onboarding_welcome_back">"Welcome back"</string>
-  <string name="screen_onboarding_welcome_message">"Welcome to the fastest %1$s ever. Supercharged for speed and simplicity."</string>
+  <string name="screen_onboarding_welcome_message">"Secure chats and calls with the people you know. %1$s is invitation-only, end-to-end encrypted and run in Switzerland."</string>
   <string name="screen_onboarding_welcome_subtitle">"Welcome to %1$s. Supercharged, for speed and simplicity."</string>
   <string name="screen_onboarding_welcome_title">"Welcome to 2ecure"</string>
   <string name="screen_qr_code_login_connecting_subtitle">"Establishing a secure connection"</string>
