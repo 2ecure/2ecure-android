@@ -205,6 +205,8 @@ class LoginFlowNode(
                     accountProvider = params.accountProvider,
                     loginHint = params.loginHint,
                     showBackButton = navTarget.showBackButton,
+                    // Only a provisioning link sets the account provider here.
+                    signInImmediately = params.accountProvider != null,
                 )
                 createNode<OnBoardingNode>(buildContext, listOf(callback, inputs))
             }
