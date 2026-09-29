@@ -54,7 +54,7 @@
   <string name="screen_onboarding_sign_in_with_qr_code">"Se connecter avec un code QR"</string>
   <string name="screen_onboarding_sign_up">"Créer un compte"</string>
   <string name="screen_onboarding_welcome_back">"Bon retour parmi nous"</string>
-  <string name="screen_onboarding_welcome_message">"Bienvenue dans l’application %1$s la plus rapide de tous les temps. Boosté pour plus de rapidité et de simplicité."</string>
+  <string name="screen_onboarding_welcome_message">"Discutez et appelez en toute sécurité avec les personnes que vous connaissez. %1$s fonctionne sur invitation, est chiffré de bout en bout et exploité en Suisse."</string>
   <string name="screen_onboarding_welcome_title">"Bienvenue sur 2ecure"</string>
   <string name="screen_qr_code_login_connecting_subtitle">"Établissement d’une connexion sécurisée"</string>
   <string name="screen_qr_code_login_connection_note_secure_state_description">"Aucune connexion sécurisée n’a pu être établie avec la nouvelle session. Vos sessions existantes sont toujours en sécurité et vous n’avez pas à vous en soucier."</string>
