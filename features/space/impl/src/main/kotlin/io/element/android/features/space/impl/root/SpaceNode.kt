@@ -26,6 +26,7 @@ import io.element.android.libraries.androidutils.system.startSharePlainTextInten
 import io.element.android.libraries.architecture.callback
 import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.core.RoomId
+import io.element.android.libraries.matrix.api.permalink.WebClientLinks
 import io.element.android.libraries.matrix.api.spaces.SpaceRoomList
 import io.element.android.libraries.ui.strings.CommonStrings
 import kotlinx.coroutines.launch
@@ -60,7 +61,7 @@ class SpaceNode(
                     context.startSharePlainTextIntent(
                         activityResultLauncher = null,
                         chooserTitle = context.getString(CommonStrings.common_share_space),
-                        text = permalink,
+                        text = WebClientLinks.fromMatrixTo(permalink),
                         noActivityFoundMessage = context.getString(R.string.error_no_compatible_app_found)
                     )
                 }

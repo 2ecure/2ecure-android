@@ -16,6 +16,7 @@ import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.notification.CallIntent
 import io.element.android.libraries.matrix.api.permalink.PermalinkBuilder
+import io.element.android.libraries.matrix.api.permalink.WebClientLinks
 import io.element.android.libraries.ui.strings.CommonStrings
 import timber.log.Timber
 
@@ -38,7 +39,7 @@ class UserProfileNodeHelper(
             context.startSharePlainTextIntent(
                 activityResultLauncher = null,
                 chooserTitle = context.getString(CommonStrings.action_share),
-                text = permalink,
+                text = WebClientLinks.fromMatrixTo(permalink),
                 noActivityFoundMessage = context.getString(R.string.error_no_compatible_app_found)
             )
         }.onFailure {
