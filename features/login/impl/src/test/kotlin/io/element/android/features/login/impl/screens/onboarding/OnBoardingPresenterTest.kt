@@ -33,6 +33,7 @@ import io.element.android.libraries.matrix.test.A_HOMESERVER_URL_2
 import io.element.android.libraries.matrix.test.A_LOGIN_HINT
 import io.element.android.libraries.matrix.test.accountprovider.anAccountProviderManaged
 import io.element.android.libraries.matrix.test.auth.FakeMatrixAuthenticationService
+import io.element.android.libraries.matrix.test.auth.aMatrixHomeServerDetails
 import io.element.android.libraries.matrix.test.core.aBuildMeta
 import io.element.android.libraries.oauth.api.OAuthActionFlow
 import io.element.android.libraries.oauth.test.FakeOAuthActionFlow
@@ -292,6 +293,43 @@ class OnBoardingPresenterTest {
                 assertThat(it.mustChooseAccountProvider).isTrue()
             }
             skipItems(1)
+        }
+    }
+
+    @Test
+    fun `present - opening the app using a provisioning link signs in right away with the login hint`() = runTest {
+        val authenticationService = FakeMatrixAuthenticationService(
+            setHomeserverResult = { Result.success(aMatrixHomeServerDetails(supportsOAuthLogin = true)) },
+        )
+        val accountProviderDataSource = anAccountProviderDataSource()
+        val forcedAccountProvider = anAccountProviderManaged(serverName = ACCOUNT_PROVIDER_FROM_CONFIG)
+        val presenter = createPresenter(
+            params = OnBoardingNode.Params(
+                accountProvider = ACCOUNT_PROVIDER_FROM_CONFIG,
+                loginHint = A_LOGIN_HINT,
+                showBackButton = false,
+                signInImmediately = true,
+            ),
+            enterpriseService = FakeEnterpriseService(
+                accountProviderAllowListResult = { listOf(forcedAccountProvider) },
+                canConnectToAnyAccountProviderResult = { false },
+                isAllowedToConnectToAccountProviderResult = { true },
+                isElementProEnforcedResult = { false },
+            ),
+            loginModePresenter = createLoginModePresenter(authenticationService = authenticationService),
+            accountProviderDataSource = accountProviderDataSource,
+        )
+        presenter.test {
+            // No event from the test: the presenter submits by itself.
+            var state = awaitItem()
+            var steps = 0
+            while (state.loginModeState.loginMode !is AsyncData.Success && steps++ < 10) {
+                state = awaitItem()
+            }
+            assertThat(state.loginModeState.loginMode).isInstanceOf(AsyncData.Success::class.java)
+            assertThat(authenticationService.getOAuthUrlLoginHint).isEqualTo(A_LOGIN_HINT)
+            assertThat(accountProviderDataSource.flow.first()).isEqualTo(forcedAccountProvider)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 

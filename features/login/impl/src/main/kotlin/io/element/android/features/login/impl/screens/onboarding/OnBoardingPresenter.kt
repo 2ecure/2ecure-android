@@ -9,6 +9,7 @@
 package io.element.android.features.login.impl.screens.onboarding
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -120,7 +121,8 @@ class OnBoardingPresenter(
                             isAccountCreation = false,
                             homeserverUrl = event.defaultAccountProvider.serverNameOrBaseUrl(),
                             resolvedHomeserverUrl = null,
-                            loginHint = params.loginHint?.takeIf { forcedAccountProvider == null },
+                            // A hint from a link is kept when the link names the forced provider (2ecure's case).
+                            loginHint = params.loginHint?.takeIf { forcedAccountProvider == null || linkAccountProvider?.matches(forcedAccountProvider) == true },
                         )
                     )
                 }
@@ -132,6 +134,16 @@ class OnBoardingPresenter(
                         }
                     }
                 }
+            }
+        }
+
+        // Opened through a provisioning link: start the sign-in right away, once, like a tap on "Sign in".
+        var signInStarted by rememberSaveable { mutableStateOf(false) }
+        LaunchedEffect(linkAccountProvider, defaultAccountProvider) {
+            val provider = defaultAccountProvider
+            if (params.signInImmediately && !signInStarted && linkAccountProvider != null && provider != null) {
+                signInStarted = true
+                handleEvent(OnBoardingEvent.OnSignIn(provider))
             }
         }
 
