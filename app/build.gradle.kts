@@ -8,7 +8,6 @@
 
 @file:Suppress("UnstableApiUsage")
 
-import com.android.build.api.variant.FilterConfiguration.FilterType.ABI
 import com.android.build.gradle.internal.tasks.factory.dependsOn
 import com.android.build.gradle.tasks.GenerateBuildConfig
 import config.BuildTimeConfig
@@ -34,13 +33,22 @@ plugins {
     // alias(libs.plugins.gms.google.services)
 }
 
+// 2ecure: every upload to Google Play needs a higher version code, but all our builds of one Element X release share
+// upstream's. versionCode = upstream code * 100 + 2ecure build number (Gradle property twoecure.buildNumber, 0..99,
+// set by the CI workflow), the same for the App Bundle and every APK: Play only receives the bundle. 26.09.2 build 1
+// is 2_026_090_201, above every upstream-style code (202_609_02x) already installed; Play's maximum of 2_100_000_000
+// is reached in the year 2100.
+val twoecureBuildNumber = (findProperty("twoecure.buildNumber") as String?)?.toInt() ?: 0
+require(twoecureBuildNumber in 0..99) { "twoecure.buildNumber must be in 0..99, is $twoecureBuildNumber" }
+val twoecureVersionCode = Versions.VERSION_CODE * 100 + twoecureBuildNumber
+
 android {
     namespace = "io.element.android.x"
 
     defaultConfig {
         applicationId = BuildTimeConfig.APPLICATION_ID
         targetSdk = Versions.TARGET_SDK
-        versionCode = Versions.VERSION_CODE
+        versionCode = twoecureVersionCode
         versionName = Versions.VERSION_NAME
 
         // Keep abiFilter for the universalApk
@@ -206,16 +214,6 @@ tasks.matching {
 }
 
 androidComponents {
-    // map for the version codes last digit
-    // x86 must have greater values than arm
-    // 64 bits have greater value than 32 bits
-    val abiVersionCodes = mapOf(
-        "armeabi-v7a" to 1,
-        "arm64-v8a" to 2,
-        "x86" to 3,
-        "x86_64" to 4,
-    )
-
     onVariants { variant ->
         // Register the R8 keep rules source folders for optimized build types (release, nightly).
         // Replaces the deprecated `optimization.keepRules.files` DSL (AGP 9+).
@@ -241,16 +239,9 @@ androidComponents {
             }
         }
 
-        // Assigns a different version code for each output APK
-        // other than the universal APK.
+        // 2ecure: one version code for the bundle and every APK (see twoecureVersionCode), no ABI digit.
         variant.outputs.forEach { output ->
-            val name = output.filters.find { it.filterType == ABI }?.identifier
-
-            // Stores the value of abiCodes that is associated with the ABI for this variant.
-            val abiCode = abiVersionCodes[name] ?: 0
-            // Assigns the new version code to output.versionCode, which changes the version code
-            // for only the output APK, not for the variant itself.
-            output.versionCode.set((output.versionCode.orNull ?: 0) * 10 + abiCode)
+            output.versionCode.set(twoecureVersionCode)
         }
     }
 
