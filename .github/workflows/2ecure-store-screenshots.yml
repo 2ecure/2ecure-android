@@ -64,6 +64,8 @@ jobs:
           profile: pixel_2  # 1080x1920, Google Play's 9:16 phone format
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
+          ram-size: 4096M  # the Pixel 2 profile's default is too small for the universal APK (emulator crashed)
+          heap-size: 512M
           disk-size: 4G
           script: bash .github/scripts/store-screenshots/run.sh
       - name: Pictures
