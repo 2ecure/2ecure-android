@@ -1,5 +1,5 @@
 # A new device decrypts a room's history (and the chat list's previews) only once the room is opened: open every chat
-# once. Opening marks them read, so the two chats that should show an unread dot are marked unread again afterwards.
+# once. (Opening marks them read; shots.yaml marks the two unread again.)
 appId: com.twoecure.messenger
 ---
 - runFlow:
@@ -35,13 +35,3 @@ appId: com.twoecure.messenger
 - runFlow:
     file: open-room.yaml
     env: {ROOM: "Allgemein"}
-- scrollUntilVisible:
-    element: "Sara Meier"
-    direction: UP
-    timeout: 30000
-- runFlow:
-    file: mark-unread.yaml
-    env: {ROOM: "WG Langstrasse"}
-- runFlow:
-    file: mark-unread.yaml
-    env: {ROOM: "Sara Meier"}
