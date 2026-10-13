@@ -30,7 +30,7 @@ appId: com.twoecure.messenger
     env: {ROOM: "Team Projekt Aare", NAME: "03-groups", SCROLL: "no"}
 - runFlow:
     file: shot-room.yaml
-    env: {ROOM: "Touren & Treffpunkte", NAME: "05-polls-calls", SCROLL: "up"}
+    env: {ROOM: "Touren & Treffpunkte", NAME: "05-polls-calls", SCROLL: "up2"}
 - tapOn: "Spaces"
 - waitForAnimationToEnd:
     timeout: 10000

@@ -9,10 +9,18 @@ appId: com.twoecure.messenger
     optional: true
 - waitForAnimationToEnd:
     timeout: 10000
-# SCROLL=up: show older messages (the poll in Touren & Treffpunkte sits above the last screenful).
+# SCROLL=up (one screen-swipe) or up2 (two): show older messages, e.g. the poll in Touren & Treffpunkte.
 - runFlow:
     when:
-      true: ${SCROLL == 'up'}
+      true: ${SCROLL == 'up2'}
+    commands:
+      - swipe:
+          start: 50%, 30%
+          end: 50%, 72%
+          duration: 900
+- runFlow:
+    when:
+      true: ${SCROLL == 'up' || SCROLL == 'up2'}
     commands:
       - swipe:
           start: 50%, 30%
