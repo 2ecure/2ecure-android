@@ -1,0 +1,23 @@
+# After the pictures: accept a pending invitation in the demo account (the owner's own, 2026-10-13). Done last, because
+# an accepted chat would move to the top of the chat list in the pictures.
+appId: com.twoecure.messenger
+---
+- launchApp:
+    stopApp: true
+- extendedWaitUntil:
+    visible:
+      id: "home_screen-settings"
+    timeout: 60000
+- scrollUntilVisible:
+    element: "Sara Meier"
+    direction: UP
+    timeout: 30000
+- repeat:
+    while:
+      visible: "Accept|Akzeptieren"
+    times: 3
+    commands:
+      - tapOn: "Accept|Akzeptieren"
+      - waitForAnimationToEnd:
+          timeout: 10000
+      - runFlow: back-to-list.yaml
