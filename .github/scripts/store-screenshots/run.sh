@@ -59,6 +59,5 @@ for lang in en de; do
   step "pictures-$lang" shots.yaml -e SHOTS="$lang" --test-output-dir "$PWD/out-$lang"
   find "out-$lang" ~/.maestro/tests -path "*/$lang/*" -name "0*.png" -newer app.apks -exec cp {} "shots/$lang/" \;
 done
-step accept-invitations accept-invites.yaml || echo "could not accept the pending invitation"
 step sign-out logout.yaml || echo "sign-out failed: remove the «2ecure» CI device of the demo account by hand"
 ls -l shots/*
