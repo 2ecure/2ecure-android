@@ -14,10 +14,11 @@ appId: com.twoecure.messenger
     when:
       true: ${SCROLL == 'up2'}
     commands:
+      # A shorter second swipe: the date label floating at the top of the timeline must not cover the poll's question.
       - swipe:
           start: 50%, 30%
-          end: 50%, 72%
-          duration: 900
+          end: 50%, 58%
+          duration: 1200
 - runFlow:
     when:
       true: ${SCROLL == 'up' || SCROLL == 'up2'}
