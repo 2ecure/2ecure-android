@@ -37,7 +37,19 @@ appId: com.twoecure.messenger
 ## Back in the app: confirm the device with the recovery key
 - extendedWaitUntil:
     visible: "Use recovery key"
-    timeout: 180000
+    timeout: 120000
+    optional: true
+# On the slow emulator the app sometimes keeps showing the welcome screen although the session exists (seen once):
+# a restart opens the signed-in part.
+- runFlow:
+    when:
+      notVisible: "Use recovery key"
+    commands:
+      - launchApp:
+          stopApp: true
+      - extendedWaitUntil:
+          visible: "Use recovery key"
+          timeout: 180000
 - tapOn: "Use recovery key"
 - tapOn:
     id: "verification-recovery_key"
