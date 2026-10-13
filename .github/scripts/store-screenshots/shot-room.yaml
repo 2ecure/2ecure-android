@@ -1,10 +1,6 @@
 appId: com.twoecure.messenger
 ---
-- scrollUntilVisible:
-    element: ${ROOM}
-    direction: DOWN
-    timeout: 30000
-    centerElement: true
+- runFlow: find-room.yaml
 - tapOn: ${ROOM}
 - extendedWaitUntil:
     visible:
