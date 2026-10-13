@@ -20,6 +20,11 @@ appId: com.twoecure.messenger
           duration: 900
       - waitForAnimationToEnd:
           timeout: 5000
+      # The date label that floats over the timeline while scrolling fades after a moment.
+      - extendedWaitUntil:
+          notVisible: ".*(September|Oktober|October).*"
+          timeout: 6000
+          optional: true
 - takeScreenshot: ${SHOTS}/${NAME}
 - runFlow: back-to-list.yaml
 - scrollUntilVisible:

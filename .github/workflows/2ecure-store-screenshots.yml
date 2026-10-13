@@ -61,7 +61,7 @@ jobs:
           api-level: 33
           arch: x86_64
           target: google_apis
-          profile: pixel_7
+          profile: pixel_2  # 1080x1920, Google Play's 9:16 phone format
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           disk-size: 4G
