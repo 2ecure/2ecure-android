@@ -1,0 +1,5 @@
+appId: com.twoecure.messenger
+---
+- longPressOn: ${ROOM}
+- tapOn: "Mark as unread|Als ungelesen markieren"
+- waitForAnimationToEnd

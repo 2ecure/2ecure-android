@@ -1,0 +1,21 @@
+# Sign the CI device out again (removes the device and its pusher from Lena's account).
+appId: com.twoecure.messenger
+---
+- launchApp:
+    stopApp: true
+- tapOn:
+    id: "home_screen-settings"
+- tapOn:
+    id: "settings-user_profile"
+- tapOn: "Remove this device|Dieses Gerät entfernen"
+- tapOn: "Remove this device|Dieses Gerät entfernen"
+- runFlow:
+    when:
+      visible:
+        id: "dialog-positive"
+    commands:
+      - tapOn:
+          id: "dialog-positive"
+- extendedWaitUntil:
+    visible: "Sign in to .*|Anmelden bei .*"
+    timeout: 60000
