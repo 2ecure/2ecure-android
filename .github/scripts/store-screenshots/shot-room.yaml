@@ -10,8 +10,6 @@ appId: com.twoecure.messenger
       id: "text_editor"
     timeout: 30000
     optional: true
-- hideKeyboard:
-    optional: true
 - waitForAnimationToEnd:
     timeout: 10000
 - takeScreenshot: ${SHOTS}/${NAME}
