@@ -1,0 +1,42 @@
+# The store pictures, in the app's current language (run.sh sets it per app). Full-screen pictures, status bar in demo
+# mode (09:41, full battery, no notification icons).
+appId: com.twoecure.messenger
+---
+- launchApp:
+    stopApp: true
+- extendedWaitUntil:
+    visible:
+      id: "home_screen-settings"
+    timeout: 60000
+- scrollUntilVisible:
+    element: "Sara Meier"
+    direction: UP
+    timeout: 30000
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: ${SHOTS}/01-chats
+- runFlow:
+    file: shot-room.yaml
+    env: {ROOM: "WG Langstrasse", NAME: "02-conversation"}
+- runFlow:
+    file: shot-room.yaml
+    env: {ROOM: "Team Projekt Aare", NAME: "03-groups"}
+- runFlow:
+    file: shot-room.yaml
+    env: {ROOM: "Touren & Treffpunkte", NAME: "05-polls-calls"}
+- tapOn: "Spaces"
+- waitForAnimationToEnd:
+    timeout: 10000
+- extendedWaitUntil:
+    visible: "Veloclub Uetliberg"
+    timeout: 30000
+- takeScreenshot: ${SHOTS}/04-spaces
+- tapOn: "Chats"
+- tapOn:
+    id: "home_screen-settings"
+- tapOn: "Encryption|Verschlüsselung"
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: ${SHOTS}/06-security
+- back
+- back

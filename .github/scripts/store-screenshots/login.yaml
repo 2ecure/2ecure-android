@@ -1,0 +1,62 @@
+# Sign in as the demo persona (secrets come from MAESTRO_* environment variables, never from this file) and verify the
+# device with the recovery key. Based on Element's .maestro/tests/account/login.yaml and verifySession.yaml.
+appId: com.twoecure.messenger
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- extendedWaitUntil:
+    visible: "Sign in to .*"
+    timeout: 120000
+- tapOn: "Sign in to .*"
+## Account page (account.2ecure.com) in a Chrome custom tab
+- runFlow:
+    when:
+      visible: "Use another account"
+    commands:
+      - tapOn: "Use another account"
+- retry:
+    maxRetries: 3
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "form-1"
+          timeout: 30000
+- tapOn:
+    id: "form-1"
+- inputText: ${MAESTRO_USERNAME}
+- pressKey: Enter
+- tapOn:
+    id: "form-3"
+- inputText: ${MAESTRO_PASSWORD}
+- pressKey: Enter
+- extendedWaitUntil:
+    visible: "Continue"
+    timeout: 60000
+- tapOn: "Continue"
+## Back in the app: confirm the device with the recovery key
+- extendedWaitUntil:
+    visible: "Use recovery key"
+    timeout: 180000
+- tapOn: "Use recovery key"
+- tapOn:
+    id: "verification-recovery_key"
+- inputText: ${MAESTRO_RECOVERY_KEY}
+- hideKeyboard
+- tapOn: "Continue"
+- retry:
+    maxRetries: 3
+    commands:
+      - extendedWaitUntil:
+          visible: "Device verified"
+          timeout: 60000
+- tapOn: "Done"
+## Notification opt-in, if shown
+- runFlow:
+    when:
+      visible: "Not now"
+    commands:
+      - tapOn: "Not now"
+- extendedWaitUntil:
+    visible: "Chats"
+    timeout: 60000

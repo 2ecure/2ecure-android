@@ -1,0 +1,22 @@
+# Open the room ${ROOM} from the chat list, wait until its timeline is there, go back to the list.
+appId: com.twoecure.messenger
+---
+- scrollUntilVisible:
+    element: ${ROOM}
+    direction: DOWN
+    timeout: 30000
+- tapOn: ${ROOM}
+- extendedWaitUntil:
+    visible:
+      id: "text_editor"
+    timeout: 30000
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 8000
+- back
+- hideKeyboard:
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "home_screen-settings"
+    timeout: 15000

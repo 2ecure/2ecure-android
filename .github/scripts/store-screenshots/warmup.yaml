@@ -1,0 +1,47 @@
+# A new device decrypts a room's history (and the chat list's previews) only once the room is opened: open every chat
+# once. Opening marks them read, so the two chats that should show an unread dot are marked unread again afterwards.
+appId: com.twoecure.messenger
+---
+- runFlow:
+    file: open-room.yaml
+    env: {ROOM: "Sara Meier"}
+- runFlow:
+    file: open-room.yaml
+    env: {ROOM: "WG Langstrasse"}
+- runFlow:
+    file: open-room.yaml
+    env: {ROOM: "Wandern & Velo Schweiz"}
+- runFlow:
+    file: open-room.yaml
+    env: {ROOM: "Züri – Tipps & Events"}
+- runFlow:
+    file: open-room.yaml
+    env: {ROOM: "2ecure Hilfe & Feedback"}
+- runFlow:
+    file: open-room.yaml
+    env: {ROOM: "Claudia Brunner"}
+- runFlow:
+    file: open-room.yaml
+    env: {ROOM: "Touren & Treffpunkte"}
+- runFlow:
+    file: open-room.yaml
+    env: {ROOM: "Familie Brunner"}
+- runFlow:
+    file: open-room.yaml
+    env: {ROOM: "Material-Börse"}
+- runFlow:
+    file: open-room.yaml
+    env: {ROOM: "Team Projekt Aare"}
+- runFlow:
+    file: open-room.yaml
+    env: {ROOM: "Allgemein"}
+- scrollUntilVisible:
+    element: "Sara Meier"
+    direction: UP
+    timeout: 30000
+- runFlow:
+    file: mark-unread.yaml
+    env: {ROOM: "WG Langstrasse"}
+- runFlow:
+    file: mark-unread.yaml
+    env: {ROOM: "Sara Meier"}
