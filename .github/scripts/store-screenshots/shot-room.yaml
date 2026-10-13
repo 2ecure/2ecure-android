@@ -13,11 +13,7 @@ appId: com.twoecure.messenger
 - waitForAnimationToEnd:
     timeout: 10000
 - takeScreenshot: ${SHOTS}/${NAME}
-- back
-- extendedWaitUntil:
-    visible:
-      id: "home_screen-settings"
-    timeout: 15000
+- runFlow: back-to-list.yaml
 - scrollUntilVisible:
     element: "Sara Meier"
     direction: UP

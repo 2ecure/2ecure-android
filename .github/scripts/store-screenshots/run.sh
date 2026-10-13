@@ -46,6 +46,7 @@ step() { # step <name> <flow> [env...]: run a flow; on failure keep Maestro's ou
 
 adb shell cmd locale set-app-locales $APP --locales en-US
 step sign-in login.yaml
+adb shell am force-stop com.android.chrome  # nothing to fall back to behind the app
 step warm-up warmup.yaml
 for lang in en de; do
   [ $lang = de ] && adb shell cmd locale set-app-locales $APP --locales de-CH

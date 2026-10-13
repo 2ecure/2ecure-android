@@ -1,0 +1,17 @@
+# Back to the chat list: the screen's own back arrow (a system back on the list itself would leave the app); if the
+# list is still not there, bring the app to the front again.
+appId: com.twoecure.messenger
+---
+- tapOn:
+    text: "Back|Zurück"
+    optional: true
+- runFlow:
+    when:
+      notVisible:
+        id: "home_screen-settings"
+    commands:
+      - launchApp
+- extendedWaitUntil:
+    visible:
+      id: "home_screen-settings"
+    timeout: 30000
