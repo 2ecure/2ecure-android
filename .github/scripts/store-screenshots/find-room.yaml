@@ -1,0 +1,18 @@
+# Bring ${ROOM} into view in the chat list, wherever it is (the order follows the latest messages).
+appId: com.twoecure.messenger
+---
+- scrollUntilVisible:
+    element: ${ROOM}
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+    optional: true
+- runFlow:
+    when:
+      notVisible: ${ROOM}
+    commands:
+      - scrollUntilVisible:
+          element: ${ROOM}
+          direction: UP
+          timeout: 30000
+          centerElement: true

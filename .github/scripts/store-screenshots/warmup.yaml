@@ -10,15 +10,6 @@ appId: com.twoecure.messenger
     env: {ROOM: "WG Langstrasse"}
 - runFlow:
     file: open-room.yaml
-    env: {ROOM: "Wandern & Velo Schweiz"}
-- runFlow:
-    file: open-room.yaml
-    env: {ROOM: "Züri – Tipps & Events"}
-- runFlow:
-    file: open-room.yaml
-    env: {ROOM: "2ecure Hilfe & Feedback"}
-- runFlow:
-    file: open-room.yaml
     env: {ROOM: "Claudia Brunner"}
 - runFlow:
     file: open-room.yaml
@@ -28,10 +19,19 @@ appId: com.twoecure.messenger
     env: {ROOM: "Familie Brunner"}
 - runFlow:
     file: open-room.yaml
-    env: {ROOM: "Material-Börse"}
-- runFlow:
-    file: open-room.yaml
     env: {ROOM: "Team Projekt Aare"}
 - runFlow:
     file: open-room.yaml
+    env: {ROOM: "Material-Börse"}
+- runFlow:
+    file: open-room.yaml
     env: {ROOM: "Allgemein"}
+- runFlow:
+    file: open-room.yaml
+    env: {ROOM: "Wandern & Velo Schweiz"}
+- runFlow:
+    file: open-room.yaml
+    env: {ROOM: "Züri – Tipps & Events"}
+- runFlow:
+    file: open-room.yaml
+    env: {ROOM: "2ecure Hilfe & Feedback"}
