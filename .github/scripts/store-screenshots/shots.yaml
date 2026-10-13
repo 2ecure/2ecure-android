@@ -8,6 +8,13 @@ appId: com.twoecure.messenger
     visible:
       id: "home_screen-settings"
     timeout: 60000
+# The other language's pass opened the WG (read): unread dots on the WG and Sara again.
+- runFlow:
+    file: mark-unread.yaml
+    env: {ROOM: "WG Langstrasse"}
+- runFlow:
+    file: mark-unread.yaml
+    env: {ROOM: "Sara Meier"}
 - scrollUntilVisible:
     element: "Sara Meier"
     direction: UP

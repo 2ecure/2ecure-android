@@ -4,6 +4,7 @@ appId: com.twoecure.messenger
     element: ${ROOM}
     direction: DOWN
     timeout: 30000
+    centerElement: true
 - tapOn: ${ROOM}
 - extendedWaitUntil:
     visible:

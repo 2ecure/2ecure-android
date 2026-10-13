@@ -7,8 +7,13 @@ appId: com.twoecure.messenger
     id: "home_screen-settings"
 - tapOn:
     id: "settings-user_profile"
+- scrollUntilVisible:
+    element: "Remove this device|Dieses Gerät entfernen"
+    direction: DOWN
+    timeout: 20000
 - tapOn: "Remove this device|Dieses Gerät entfernen"
-- tapOn: "Remove this device|Dieses Gerät entfernen"
+- tapOn:
+    id: "sign-out-submit"
 - runFlow:
     when:
       visible:

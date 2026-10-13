@@ -24,6 +24,7 @@ adb shell pm grant $APP android.permission.POST_NOTIFICATIONS || true
 
 echo "== Status bar: demo mode (09:41, full battery, Wi-Fi and mobile full, no notification icons)"
 adb shell svc wifi enable || true
+adb shell settings put system time_12_24 24  # 09:50, not 9:50 AM, as in the iOS pictures
 adb shell settings put global sysui_demo_allowed 1
 demo() { adb shell am broadcast -a com.android.systemui.demo -e command "$@" >/dev/null; }
 demo enter
