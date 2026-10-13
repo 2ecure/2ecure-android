@@ -49,8 +49,10 @@ step sign-in login.yaml
 step warm-up warmup.yaml
 for lang in en de; do
   [ $lang = de ] && adb shell cmd locale set-app-locales $APP --locales de-CH
-  mkdir -p "shots/$lang"
-  step "pictures-$lang" shots.yaml -e SHOTS="$PWD/shots/$lang"
+  # Maestro writes pictures only below its output folder: relative names there, then collected into shots/<lang>/.
+  rm -rf "out-$lang"; mkdir -p "out-$lang" "shots/$lang"
+  step "pictures-$lang" shots.yaml -e SHOTS="$lang" --test-output-dir "$PWD/out-$lang"
+  find "out-$lang" ~/.maestro/tests -path "*/$lang/*" -name "0*.png" -newer app.apks -exec cp {} "shots/$lang/" \;
 done
 step sign-out logout.yaml || echo "sign-out failed: remove the «2ecure» CI device of the demo account by hand"
 ls -l shots/*
