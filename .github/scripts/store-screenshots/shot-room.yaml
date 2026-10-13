@@ -13,6 +13,17 @@ appId: com.twoecure.messenger
     optional: true
 - waitForAnimationToEnd:
     timeout: 10000
+# SCROLL=up: show older messages (the poll in Touren & Treffpunkte sits above the last screenful).
+- runFlow:
+    when:
+      true: ${SCROLL == 'up'}
+    commands:
+      - swipe:
+          start: 50%, 30%
+          end: 50%, 72%
+          duration: 900
+      - waitForAnimationToEnd:
+          timeout: 5000
 - takeScreenshot: ${SHOTS}/${NAME}
 - runFlow: back-to-list.yaml
 - scrollUntilVisible:
