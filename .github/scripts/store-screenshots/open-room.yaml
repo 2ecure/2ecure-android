@@ -14,8 +14,6 @@ appId: com.twoecure.messenger
 - waitForAnimationToEnd:
     timeout: 8000
 - back
-- hideKeyboard:
-    optional: true
 - extendedWaitUntil:
     visible:
       id: "home_screen-settings"
