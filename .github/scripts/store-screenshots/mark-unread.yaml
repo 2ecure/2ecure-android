@@ -1,5 +1,19 @@
+# Mark ${ROOM} unread (an unread dot in the chat list). If it is unread already, the menu offers «Mark as read»
+# instead: then just close the menu.
 appId: com.twoecure.messenger
 ---
+- scrollUntilVisible:
+    element: ${ROOM}
+    direction: UP
+    timeout: 20000
+    centerElement: true
 - longPressOn: ${ROOM}
-- tapOn: "Mark as unread|Als ungelesen markieren"
+- tapOn:
+    text: "Mark as unread|Als ungelesen markieren"
+    optional: true
+- runFlow:
+    when:
+      visible: "Mark as read|Als gelesen markieren"
+    commands:
+      - back
 - waitForAnimationToEnd
