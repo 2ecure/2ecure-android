@@ -13,8 +13,4 @@ appId: com.twoecure.messenger
     optional: true
 - waitForAnimationToEnd:
     timeout: 8000
-- back
-- extendedWaitUntil:
-    visible:
-      id: "home_screen-settings"
-    timeout: 15000
+- runFlow: back-to-list.yaml

@@ -32,11 +32,10 @@ appId: com.twoecure.messenger
     timeout: 30000
 - takeScreenshot: ${SHOTS}/04-spaces
 - tapOn: "Chats"
+- runFlow: back-to-list.yaml
 - tapOn:
     id: "home_screen-settings"
 - tapOn: "Encryption|Verschlüsselung"
 - waitForAnimationToEnd:
     timeout: 10000
 - takeScreenshot: ${SHOTS}/06-security
-- back
-- back
