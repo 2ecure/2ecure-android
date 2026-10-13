@@ -17,9 +17,12 @@ sleep 5
 echo "== Install the app from the bundle (APKs for this emulator, signed with a throwaway key)"
 keytool -genkeypair -keystore ci.keystore -storepass android -keypass android -alias ci -keyalg RSA -keysize 2048 \
   -validity 30 -dname "CN=2ecure CI" >/dev/null 2>&1
-java -jar bundletool.jar build-apks --bundle=app.aab --output=app.apks --connected-device --overwrite \
+# One universal APK (every language and CPU type, about 335 MB): a device-specific set would carry only the
+# emulator's system language, and the German pictures would show English texts.
+java -jar bundletool.jar build-apks --bundle=app.aab --output=app.apks --mode=universal --overwrite \
   --ks=ci.keystore --ks-pass=pass:android --ks-key-alias=ci --key-pass=pass:android
-java -jar bundletool.jar install-apks --apks=app.apks
+unzip -o -q app.apks universal.apk
+adb install -r universal.apk
 adb shell pm grant $APP android.permission.POST_NOTIFICATIONS || true
 
 echo "== Status bar: demo mode (09:41, full battery, Wi-Fi and mobile full, no notification icons)"
