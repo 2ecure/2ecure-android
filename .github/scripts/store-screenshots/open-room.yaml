@@ -1,11 +1,7 @@
 # Open the room ${ROOM} from the chat list, wait until its timeline is there, go back to the list.
 appId: com.twoecure.messenger
 ---
-- scrollUntilVisible:
-    element: ${ROOM}
-    direction: DOWN
-    timeout: 30000
-    centerElement: true
+- runFlow: find-room.yaml
 - tapOn: ${ROOM}
 - extendedWaitUntil:
     visible:
