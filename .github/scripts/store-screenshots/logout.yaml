@@ -10,15 +10,21 @@ appId: com.twoecure.messenger
     direction: DOWN
     timeout: 20000
 - tapOn: "Remove this device|Dieses Gerät entfernen"
-- tapOn:
-    id: "sign-out-submit"
+# With the key backup up to date the app asks in a dialog; otherwise it shows a sign-out screen first.
 - runFlow:
     when:
       visible:
-        id: "dialog-positive"
+        id: "sign-out-submit"
     commands:
       - tapOn:
-          id: "dialog-positive"
+          id: "sign-out-submit"
+- tapOn:
+    id: "dialog-positive"
+    optional: true
+- tapOn:
+    text: "Remove this device|Dieses Gerät entfernen"
+    index: 1
+    optional: true
 - extendedWaitUntil:
     visible: "Sign in to .*|Anmelden bei .*"
     timeout: 60000
