@@ -24,13 +24,13 @@ appId: com.twoecure.messenger
 - takeScreenshot: ${SHOTS}/01-chats
 - runFlow:
     file: shot-room.yaml
-    env: {ROOM: "WG Langstrasse", NAME: "02-conversation", SCROLL: "up"}
+    env: {ROOM: "WG Langstrasse", NAME: "02-conversation", SCROLL: "up", FOCUS: ""}
 - runFlow:
     file: shot-room.yaml
-    env: {ROOM: "Team Projekt Aare", NAME: "03-groups", SCROLL: "no"}
+    env: {ROOM: "Team Projekt Aare", NAME: "03-groups", SCROLL: "no", FOCUS: ""}
 - runFlow:
     file: shot-room.yaml
-    env: {ROOM: "Touren & Treffpunkte", NAME: "05-polls-calls", SCROLL: "up2"}
+    env: {ROOM: "Touren & Treffpunkte", NAME: "05-polls-calls", SCROLL: "no", FOCUS: "Weli Rundi fahred mir am Samstig\\?"}
 - tapOn: "Spaces"
 - waitForAnimationToEnd:
     timeout: 10000

@@ -9,19 +9,23 @@ appId: com.twoecure.messenger
     optional: true
 - waitForAnimationToEnd:
     timeout: 10000
-# SCROLL=up (one screen-swipe) or up2 (two): show older messages, e.g. the poll in Touren & Treffpunkte.
+# SCROLL=up: one swipe towards older messages.
+# FOCUS: a text to centre on screen (exact, unlike swipes), e.g. the poll's question; the date label that floats at the
+# top of the timeline then stays above it.
 - runFlow:
     when:
-      true: ${SCROLL == 'up2'}
+      true: ${FOCUS != ''}
     commands:
-      # A shorter second swipe: the date label floating at the top of the timeline must not cover the poll's question.
-      - swipe:
-          start: 50%, 30%
-          end: 50%, 58%
-          duration: 1200
+      - scrollUntilVisible:
+          element: ${FOCUS}
+          direction: UP
+          timeout: 30000
+          centerElement: true
+      - waitForAnimationToEnd:
+          timeout: 5000
 - runFlow:
     when:
-      true: ${SCROLL == 'up' || SCROLL == 'up2'}
+      true: ${SCROLL == 'up'}
     commands:
       - swipe:
           start: 50%, 30%
