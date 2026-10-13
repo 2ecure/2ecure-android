@@ -24,7 +24,7 @@ appId: com.twoecure.messenger
 - takeScreenshot: ${SHOTS}/01-chats
 - runFlow:
     file: shot-room.yaml
-    env: {ROOM: "WG Langstrasse", NAME: "02-conversation", SCROLL: "no"}
+    env: {ROOM: "WG Langstrasse", NAME: "02-conversation", SCROLL: "up"}
 - runFlow:
     file: shot-room.yaml
     env: {ROOM: "Team Projekt Aare", NAME: "03-groups", SCROLL: "no"}
