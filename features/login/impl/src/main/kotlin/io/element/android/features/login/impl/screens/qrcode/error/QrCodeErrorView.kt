@@ -79,7 +79,8 @@ private fun titleText(errorScreenType: QrCodeErrorScreenType, appName: String) =
 private fun subtitleText(errorScreenType: QrCodeErrorScreenType, appName: String) = when (errorScreenType) {
     QrCodeErrorScreenType.Cancelled -> stringResource(R.string.screen_qr_code_login_error_cancelled_subtitle)
     QrCodeErrorScreenType.Declined -> stringResource(R.string.screen_qr_code_login_error_declined_subtitle)
-    QrCodeErrorScreenType.Expired -> stringResource(R.string.screen_qr_code_login_error_expired_subtitle)
+    // 2ecure: the server's QR sign-in lives one minute from the QR code's display; own key, the old one is shared with linking a device.
+    QrCodeErrorScreenType.Expired -> stringResource(R.string.screen_qr_code_login_error_expired_one_minute_subtitle)
     QrCodeErrorScreenType.ProtocolNotSupported -> stringResource(R.string.screen_qr_code_login_error_linking_not_suported_subtitle, appName)
     QrCodeErrorScreenType.InsecureChannelDetected -> stringResource(id = R.string.screen_qr_code_login_connection_note_secure_state_description)
     QrCodeErrorScreenType.SlidingSyncNotAvailable -> stringResource(id = R.string.screen_qr_code_login_error_sliding_sync_not_supported_subtitle, appName)

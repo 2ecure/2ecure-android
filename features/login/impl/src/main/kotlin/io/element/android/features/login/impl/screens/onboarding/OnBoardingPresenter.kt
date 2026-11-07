@@ -25,13 +25,17 @@ import io.element.android.appconfig.OnBoardingConfig
 import io.element.android.features.enterprise.api.EnterpriseService
 import io.element.android.features.login.impl.accesscontrol.DefaultAccountProviderAccessControl
 import io.element.android.features.login.impl.accountprovider.AccountProviderDataSource
+import io.element.android.features.login.impl.login.LoginMode
 import io.element.android.features.login.impl.login.LoginModeEvent
 import io.element.android.features.login.impl.login.LoginModeState
 import io.element.android.features.rageshake.api.RageshakeFeatureAvailability
+import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.core.meta.BuildMeta
 import io.element.android.libraries.core.meta.BuildType
 import io.element.android.libraries.matrix.api.accountprovider.AccountProvider
+import io.element.android.libraries.matrix.api.auth.OAuthDetails
+import io.element.android.libraries.matrix.api.permalink.InvitationLinks
 import io.element.android.libraries.sessionstorage.api.SessionStore
 import io.element.android.libraries.ui.utils.MultipleTapToUnlock
 import kotlinx.coroutines.launch
@@ -147,6 +151,32 @@ class OnBoardingPresenter(
             }
         }
 
+        // 2ecure: an invitation scanned with «Scan QR code» (InvitationLinks): open the registration right away, once.
+        var accountCreationStarted by rememberSaveable { mutableStateOf(false) }
+        LaunchedEffect(defaultAccountProvider) {
+            val provider = defaultAccountProvider
+            if (params.invitationCode != null && !accountCreationStarted && provider != null) {
+                accountCreationStarted = true
+                accountProviderDataSource.setAccountProvider(provider)
+                loginModeState.eventSink(
+                    LoginModeEvent.Submit(
+                        isAccountCreation = true,
+                        homeserverUrl = provider.serverNameOrBaseUrl(),
+                        resolvedHomeserverUrl = null,
+                        loginHint = null,
+                    )
+                )
+            }
+        }
+        // The registration opens with the invitation's code (#code=), which 2ecure's account pages fill in.
+        val oAuthMode = loginModeState.loginMode.dataOrNull() as? LoginMode.OAuth
+        val shownLoginModeState = if (params.invitationCode != null && oAuthMode != null) {
+            val url = InvitationLinks.withInvitationCode(oAuthMode.oAuthDetails.url, params.invitationCode)
+            loginModeState.copy(loginMode = AsyncData.Success(LoginMode.OAuth(OAuthDetails(url))))
+        } else {
+            loginModeState
+        }
+
         return OnBoardingState(
             isAddingAccount = isAddingAccount,
             showBackButton = params.showBackButton,
@@ -157,7 +187,7 @@ class OnBoardingPresenter(
             canLoginWithQrCode = canLoginWithQrCode,
             canCreateAccount = defaultAccountProvider == null && canConnectToAnyAccountProvider && OnBoardingConfig.CAN_CREATE_ACCOUNT,
             canReportBug = canReportBug && showReportBug,
-            loginModeState = loginModeState,
+            loginModeState = shownLoginModeState,
             version = buildMeta.versionName,
             onBoardingLogoResId = onBoardingLogoResId,
             eventSink = ::handleEvent,

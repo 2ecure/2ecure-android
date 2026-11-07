@@ -58,8 +58,16 @@ fun QrCodeScanView(
     onBackClick: () -> Unit,
     onQrCodeDataReady: (MatrixQrCodeLoginData) -> Unit,
     modifier: Modifier = Modifier,
+    onInvitationScanned: (String) -> Unit = {},
 ) {
     val updatedOnQrCodeDataReady by rememberUpdatedState(onQrCodeDataReady)
+    val updatedOnInvitationScanned by rememberUpdatedState(onInvitationScanned)
+    // 2ecure: an invitation's QR code, notify the parent node to create the account
+    state.invitationCode?.let { invitationCode ->
+        LaunchedEffect(invitationCode) {
+            updatedOnInvitationScanned(invitationCode)
+        }
+    }
     // QR code data parsed successfully, notify the parent node
     if (state.authenticationAction is AsyncAction.Success) {
         LaunchedEffect(state.authenticationAction, updatedOnQrCodeDataReady) {
@@ -182,7 +190,8 @@ private fun ColumnScope.Buttons(
                             is QrLoginException.OtherDeviceNotSignedIn -> {
                                 stringResource(R.string.screen_qr_code_login_device_not_signed_in_scan_state_description)
                             }
-                            else -> stringResource(R.string.screen_qr_code_login_invalid_scan_state_description)
+                            // 2ecure: this scanner also takes invitations (InvitationLinks); own key, the old one is shared with linking a device.
+                            else -> stringResource(R.string.screen_qr_code_login_invalid_scan_state_invitation_description)
                         },
                         textAlign = TextAlign.Center,
                         style = ElementTheme.typography.fontBodySmRegular,

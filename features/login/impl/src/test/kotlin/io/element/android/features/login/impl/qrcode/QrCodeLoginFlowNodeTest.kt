@@ -188,6 +188,7 @@ class QrCodeLoginFlowNodeTest : RobolectricTest() {
             plugins = listOf(
                 object : QrCodeLoginFlowNode.Callback {
                     override fun navigateBack() = lambdaError()
+                    override fun createAccount(invitationCode: String) = lambdaError()
                 }
             ),
             qrCodeLoginGraphFactory = FakeQrCodeLoginGraph.Builder(qrCodeLoginManager),

@@ -26,6 +26,7 @@ import io.element.android.libraries.matrix.api.auth.qrlogin.MatrixQrCodeLoginDat
 import io.element.android.libraries.matrix.api.auth.qrlogin.MatrixQrCodeLoginDataFactory
 import io.element.android.libraries.matrix.api.auth.qrlogin.QrCodeLoginStep
 import io.element.android.libraries.matrix.api.auth.qrlogin.QrLoginException
+import io.element.android.libraries.matrix.api.permalink.InvitationLinks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -40,6 +41,7 @@ class QrCodeScanPresenter(
     private val coroutineDispatchers: CoroutineDispatchers,
 ) : Presenter<QrCodeScanState> {
     private var isScanning by mutableStateOf(true)
+    private var invitationCode by mutableStateOf<String?>(null)
 
     private val isProcessingCode = AtomicBoolean(false)
 
@@ -60,7 +62,14 @@ class QrCodeScanPresenter(
                 }
                 is QrCodeScanEvent.QrCodeScanned -> {
                     isScanning = false
-                    coroutineScope.getQrCodeData(authenticationAction, event.code)
+                    // 2ecure: the button scans both kinds of code, so an invitation creates the account instead of «Wrong QR code».
+                    val code = InvitationLinks.invitationCode(event.code)
+                    if (code != null) {
+                        Timber.i("Scanned a 2ecure invitation")
+                        invitationCode = code
+                    } else {
+                        coroutineScope.getQrCodeData(authenticationAction, event.code)
+                    }
                 }
             }
         }
@@ -69,6 +78,7 @@ class QrCodeScanPresenter(
             isScanning = isScanning,
             authenticationAction = authenticationAction.value,
             eventSink = ::handleEvent,
+            invitationCode = invitationCode,
         )
     }
 

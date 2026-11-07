@@ -51,6 +51,8 @@ class OnBoardingNode(
         val showBackButton: Boolean,
         // 2ecure: opened through a provisioning link (account pages, invitations): sign in right away.
         val signInImmediately: Boolean = false,
+        // 2ecure: an invitation scanned with «Scan QR code»: create the account right away, with this code.
+        val invitationCode: String? = null,
     ) : NodeInputs
 
     private val callback: Callback = callback()

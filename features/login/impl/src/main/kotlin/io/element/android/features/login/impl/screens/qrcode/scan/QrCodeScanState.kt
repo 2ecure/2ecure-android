@@ -14,5 +14,7 @@ import io.element.android.libraries.matrix.api.auth.qrlogin.MatrixQrCodeLoginDat
 data class QrCodeScanState(
     val isScanning: Boolean,
     val authenticationAction: AsyncAction<MatrixQrCodeLoginData>,
-    val eventSink: (QrCodeScanEvent) -> Unit
+    val eventSink: (QrCodeScanEvent) -> Unit,
+    // 2ecure: a scanned invitation's code (InvitationLinks); the account is then created instead of signing in.
+    val invitationCode: String? = null,
 )

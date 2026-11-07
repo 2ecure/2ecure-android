@@ -29,6 +29,9 @@ class QrCodeScanNode(
 ) : Node(buildContext, plugins = plugins) {
     interface Callback : Plugin {
         fun handleScannedCode(qrCodeLoginData: MatrixQrCodeLoginData)
+
+        // 2ecure: an invitation's QR code was scanned instead of another device's.
+        fun createAccount(invitationCode: String)
         fun cancel()
     }
 
@@ -40,6 +43,7 @@ class QrCodeScanNode(
         QrCodeScanView(
             state = state,
             onQrCodeDataReady = callback::handleScannedCode,
+            onInvitationScanned = callback::createAccount,
             onBackClick = callback::cancel,
             modifier = modifier
         )

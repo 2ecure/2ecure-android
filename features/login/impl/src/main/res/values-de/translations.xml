@@ -48,7 +48,7 @@
   <string name="screen_onboarding_checking_account">"Konto wird geprüft"</string>
   <string name="screen_onboarding_sign_in_manually">"Manuell anmelden"</string>
   <string name="screen_onboarding_sign_in_to">"Anmelden bei %1$s"</string>
-  <string name="screen_onboarding_sign_in_with_qr_code">"Mit QR-Code anmelden"</string>
+  <string name="screen_onboarding_sign_in_with_qr_code">"QR-Code scannen"</string>
   <string name="screen_onboarding_sign_up">"Konto erstellen"</string>
   <string name="screen_onboarding_welcome_back">"Willkommen zurück"</string>
   <string name="screen_onboarding_welcome_message">"Sicher schreiben und telefonieren – mit Menschen, die du kennst. %1$s gibt es nur auf Einladung, ist Ende-zu-Ende-verschlüsselt und wird in der Schweiz betrieben."</string>
@@ -70,6 +70,7 @@
   <string name="screen_qr_code_login_error_declined_title">"Anmelden abgelehnt"</string>
   <string name="screen_qr_code_login_error_device_already_signed_in_subtitle">"Du musst nichts weiter tun."</string>
   <string name="screen_qr_code_login_error_device_already_signed_in_title">"Dein anderes Gerät ist schon angemeldet"</string>
+  <string name="screen_qr_code_login_error_expired_one_minute_subtitle">"Ein QR-Code gilt nur eine Minute lang. Lass einen neuen anzeigen und schliesse die Anmeldung auf beiden Geräten gleich ab."</string>
   <string name="screen_qr_code_login_error_expired_subtitle">"Die Anmeldung ist abgelaufen. Bitte versuche es erneut."</string>
   <string name="screen_qr_code_login_error_expired_title">"Die Anmeldung wurde nicht rechtzeitig abgeschlossen"</string>
   <string name="screen_qr_code_login_error_linking_not_suported_subtitle">"Dein anderes Gerät unterstützt die Anmeldung bei %s mit einem QR-Code nicht.
@@ -84,9 +85,10 @@ Versuche, dich manuell anzumelden, oder scanne den QR-Code mit einem anderen Ger
   <string name="screen_qr_code_login_initial_state_item_3">"Wähle %1$s"</string>
   <string name="screen_qr_code_login_initial_state_item_3_action">"„Neues Gerät verknüpfen“"</string>
   <string name="screen_qr_code_login_initial_state_item_4">"Scanne den QR-Code mit diesem Gerät"</string>
-  <string name="screen_qr_code_login_initial_state_subtitle">"Nur verfügbar falls dein Kontoanbieter dies unterstützt."</string>
-  <string name="screen_qr_code_login_initial_state_title">"Öffne %1$s auf einem anderen Gerät, um den QR-Code zu erhalten"</string>
+  <string name="screen_qr_code_login_initial_state_subtitle">"Mit dem QR-Code aus deiner Einladung erstellst du dein Konto. So meldest du dich mit einem Konto an, das du schon auf einem anderen Gerät nutzt:"</string>
+  <string name="screen_qr_code_login_initial_state_title">"Scanne den QR-Code aus deiner Einladung oder öffne %1$s auf einem anderen Gerät, um einen zu erhalten"</string>
   <string name="screen_qr_code_login_invalid_scan_state_description">"Verwende den QR-Code, der auf dem anderen Gerät angezeigt wird."</string>
+  <string name="screen_qr_code_login_invalid_scan_state_invitation_description">"Verwende den QR-Code aus deiner Einladung oder den, der auf deinem anderen Gerät angezeigt wird."</string>
   <string name="screen_qr_code_login_invalid_scan_state_retry_button">"Erneut versuchen"</string>
   <string name="screen_qr_code_login_invalid_scan_state_subtitle">"Falscher QR-Code"</string>
   <string name="screen_qr_code_login_no_camera_permission_button">"Gehe zu den Kameraeinstellungen"</string>

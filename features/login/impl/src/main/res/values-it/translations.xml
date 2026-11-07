@@ -48,7 +48,7 @@
   <string name="screen_onboarding_checking_account">"Verifica dell\'account"</string>
   <string name="screen_onboarding_sign_in_manually">"Accedi manualmente"</string>
   <string name="screen_onboarding_sign_in_to">"Accedi a %1$s"</string>
-  <string name="screen_onboarding_sign_in_with_qr_code">"Accedi con codice QR"</string>
+  <string name="screen_onboarding_sign_in_with_qr_code">"Scansiona codice QR"</string>
   <string name="screen_onboarding_sign_up">"Crea account"</string>
   <string name="screen_onboarding_welcome_back">"Bentornato"</string>
   <string name="screen_onboarding_welcome_message">"Chat e chiamate sicure con le persone che conosci. %1$s è solo su invito, crittografato end-to-end e gestito in Svizzera."</string>
@@ -70,6 +70,7 @@
   <string name="screen_qr_code_login_error_declined_title">"Accesso rifiutato"</string>
   <string name="screen_qr_code_login_error_device_already_signed_in_subtitle">"Non devi fare altro."</string>
   <string name="screen_qr_code_login_error_device_already_signed_in_title">"L\'altro tuo dispositivo è già connesso"</string>
+  <string name="screen_qr_code_login_error_expired_one_minute_subtitle">"Un codice QR è valido solo per un minuto. Mostrane uno nuovo e completa subito l\'accesso su entrambi i dispositivi."</string>
   <string name="screen_qr_code_login_error_expired_subtitle">"L\'accesso è scaduto. Riprova."</string>
   <string name="screen_qr_code_login_error_expired_title">"L\'accesso non è stato completato in tempo"</string>
   <string name="screen_qr_code_login_error_linking_not_suported_subtitle">"L\'altro dispositivo non supporta l\'accesso a %s con un codice QR.
@@ -84,9 +85,10 @@ Prova ad accedere manualmente o scansiona il codice QR con un altro dispositivo.
   <string name="screen_qr_code_login_initial_state_item_3">"Seleziona %1$s"</string>
   <string name="screen_qr_code_login_initial_state_item_3_action">"\"Collega un nuovo dispositivo\""</string>
   <string name="screen_qr_code_login_initial_state_item_4">"Scansiona il codice QR con questo dispositivo"</string>
-  <string name="screen_qr_code_login_initial_state_subtitle">"Disponibile solo se il provider del tuo account lo supporta."</string>
-  <string name="screen_qr_code_login_initial_state_title">"Apri %1$s su un altro dispositivo per ottenere il codice QR"</string>
+  <string name="screen_qr_code_login_initial_state_subtitle">"Con il codice QR del tuo invito crei il tuo account. Per accedere con un account che usi già su un altro dispositivo:"</string>
+  <string name="screen_qr_code_login_initial_state_title">"Scansiona il codice QR del tuo invito oppure apri %1$s su un altro dispositivo per ottenerne uno"</string>
   <string name="screen_qr_code_login_invalid_scan_state_description">"Usa il codice QR mostrato sull\'altro dispositivo."</string>
+  <string name="screen_qr_code_login_invalid_scan_state_invitation_description">"Usa il codice QR del tuo invito o quello mostrato sull\'altro dispositivo."</string>
   <string name="screen_qr_code_login_invalid_scan_state_retry_button">"Riprova"</string>
   <string name="screen_qr_code_login_invalid_scan_state_subtitle">"Codice QR sbagliato"</string>
   <string name="screen_qr_code_login_no_camera_permission_button">"Vai alle impostazioni della fotocamera"</string>

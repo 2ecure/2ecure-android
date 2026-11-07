@@ -84,6 +84,9 @@ class LoginFlowNode(
 
     private var externalAppStarted = false
 
+    // 2ecure: the start screen's back button, kept when an invitation scan reopens it (QrCodeLoginFlowNode.Callback.createAccount).
+    private var onBoardingShowsBackButton = false
+
     override fun onBuilt() {
         super.onBuilt()
         lifecycle.subscribe(
@@ -110,6 +113,8 @@ class LoginFlowNode(
         @Parcelize
         data class OnBoarding(
             val showBackButton: Boolean,
+            // 2ecure: an invitation scanned with «Scan QR code»: create the account right away with its code.
+            val invitationCode: String? = null,
         ) : NavTarget
 
         @Parcelize
@@ -155,6 +160,7 @@ class LoginFlowNode(
                 createNode<ClassicFlowNode>(buildContext, listOf(callback))
             }
             is NavTarget.OnBoarding -> {
+                onBoardingShowsBackButton = navTarget.showBackButton
                 val callback = object : OnBoardingNode.Callback {
                     override fun navigateToSignUpFlow() {
                         backstack.push(
@@ -207,6 +213,7 @@ class LoginFlowNode(
                     showBackButton = navTarget.showBackButton,
                     // Only a provisioning link sets the account provider here.
                     signInImmediately = params.accountProvider != null,
+                    invitationCode = navTarget.invitationCode,
                 )
                 createNode<OnBoardingNode>(buildContext, listOf(callback, inputs))
             }
@@ -238,6 +245,12 @@ class LoginFlowNode(
                 val callback = object : QrCodeLoginFlowNode.Callback {
                     override fun navigateBack() {
                         backstack.pop()
+                    }
+
+                    override fun createAccount(invitationCode: String) {
+                        // Back to the start screen, which opens the registration with the code.
+                        backstack.pop()
+                        backstack.replace(NavTarget.OnBoarding(showBackButton = onBoardingShowsBackButton, invitationCode = invitationCode))
                     }
                 }
                 createNode<QrCodeLoginFlowNode>(buildContext, listOf(callback))

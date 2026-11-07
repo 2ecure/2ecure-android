@@ -67,6 +67,9 @@ class QrCodeLoginFlowNode(
 ), DependencyInjectionGraphOwner {
     interface Callback : Plugin {
         fun navigateBack()
+
+        // 2ecure: an invitation's QR code was scanned (InvitationLinks): create the account with its code.
+        fun createAccount(invitationCode: String)
     }
 
     private val callback: Callback = callback()
@@ -174,6 +177,10 @@ class QrCodeLoginFlowNode(
                 val callback = object : QrCodeScanNode.Callback {
                     override fun handleScannedCode(qrCodeLoginData: MatrixQrCodeLoginData) {
                         lifecycleScope.startAuthentication(qrCodeLoginData)
+                    }
+
+                    override fun createAccount(invitationCode: String) {
+                        callback.createAccount(invitationCode)
                     }
 
                     override fun cancel() {
