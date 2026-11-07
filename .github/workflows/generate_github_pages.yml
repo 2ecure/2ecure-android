@@ -1,0 +1,36 @@
+name: Generate GitHub Pages
+on:
+  workflow_dispatch:
+# Disabled for now, as we don't want to generate GitHub Pages on every push to main anymore
+#  schedule:
+#    # At 00:00 on every Tuesday UTC
+#    - cron: '0 0 * * 2'
+
+permissions: {}
+
+jobs:
+  generate-github-pages:
+    runs-on: ubuntu-latest
+    # Skip in forks
+    if: github.repository == 'element-hq/element-x-android'
+    permissions:
+      contents: write
+    steps:
+      - name: ⏬ Checkout with LFS
+        uses: nschloe/action-cached-lfs-checkout@385a8ecc719e50b8c71af6ab01a624b486b7c3bc # v1.2.5
+        with:
+          persist-credentials: false
+      - name: Setup build environment
+        uses: $/.github/actions/setup-build
+        with:
+          python-version: 3.15
+      - name: Run World screenshots generation script
+        run: |
+          ./tools/test/generateWorldScreenshots.py
+          mkdir -p screenshots/en
+          cp tests/uitests/src/test/snapshots/images/* screenshots/en
+      - name: Deploy GitHub Pages
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./screenshots

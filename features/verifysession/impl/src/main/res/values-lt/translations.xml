@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="screen_session_verification_compare_emojis_subtitle">"Patvirtinkite, kad žemiau esantys jaustukai atitinka tuos, kurie rodomi kitame jūsų įrenginyje."</string>
+  <string name="screen_session_verification_compare_emojis_title">"Palyginkite jaustukus"</string>
+  <string name="screen_session_verification_complete_subtitle">"Dabar galite saugiai skaityti arba siųsti žinutes kitame savo įrenginyje."</string>
+  <string name="screen_session_verification_positive_button_verifying_ongoing">"Laukiama atitikimo…"</string>
+  <string name="screen_session_verification_they_dont_match">"Jie nesutampa"</string>
+  <string name="screen_session_verification_they_match">"Jie sutampa"</string>
+  <string name="screen_session_verification_waiting_to_accept_title">"Laukiama prašymo priėmimo"</string>
+</resources>

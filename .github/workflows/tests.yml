@@ -1,0 +1,94 @@
+name: Test
+
+on:
+  workflow_dispatch:
+  pull_request:
+  merge_group:
+  push:
+    branches: [ main, develop ]
+
+permissions: {}
+
+# Enrich gradle.properties for CI/CD
+env:
+  GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx7g -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError" -Dkotlin.daemon.jvm.options=-Xmx2g -XX:+UseG1GC
+  CI_GRADLE_ARG_PROPERTIES: --stacktrace -Dsonar.gradle.skipCompile=true --no-configuration-cache
+
+jobs:
+  tests:
+    name: Runs unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    # Allow all jobs on main and develop. Just one per PR.
+    concurrency:
+      group: ${{ github.ref == 'refs/heads/main' && format('unit-tests-main-{0}', github.sha) || github.ref == 'refs/heads/develop' && format('unit-tests-develop-{0}', github.sha) || format('unit-tests-{0}', github.ref) }}
+      cancel-in-progress: true
+    steps:
+      # Increase swapfile size to prevent screenshot tests getting terminated
+      # https://github.com/actions/runner-images/discussions/7188#discussioncomment-6750749
+      - name: 💽 Increase swapfile size
+        run: |
+          sudo swapoff -a
+          sudo fallocate -l 8G /mnt/swapfile
+          sudo chmod 600 /mnt/swapfile
+          sudo mkswap /mnt/swapfile
+          sudo swapon /mnt/swapfile
+          sudo swapon --show
+      - name: ⏬ Checkout with LFS
+        uses: nschloe/action-cached-lfs-checkout@385a8ecc719e50b8c71af6ab01a624b486b7c3bc # v1.2.5
+        with:
+          persist-credentials: false
+          # Ensure we are building the branch and not the branch after being merged on develop
+          # https://github.com/actions/checkout/issues/881
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.ref }}
+      - name: Setup build environment
+        uses: $/.github/actions/setup-build
+        with:
+          free-disk-space: 'true'
+          enterprise-ssh-key: ${{ secrets.ELEMENT_ENTERPRISE_DEPLOY_KEY }}
+          # Only this job writes the Gradle cache on develop, see the setup-build action
+          gradle-cache-read-only: ${{ github.ref != 'refs/heads/develop' }}
+      - name: ⚙️ Run unit tests
+        run: ./gradlew :app:testGplayDebugUnitTest testDebugUnitTest -x :tests:konsist:testDebugUnitTest $CI_GRADLE_ARG_PROPERTIES --continue
+
+      - name: ⚙️ Run screenshot tests
+        run: ./gradlew verifyPaparazziDebug $CI_GRADLE_ARG_PROPERTIES --continue
+
+      - name: ⚙️ Generate kover coverage report
+        run: ./gradlew :koverXmlReportMerged :koverHtmlReportMerged :koverVerifyAll -x testDebugUnitTest $CI_GRADLE_ARG_PROPERTIES
+
+      - name: 🚫 Upload kover failed coverage reports
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: kover-error-report
+          path: |
+            build/reports/kover
+
+      - name: 🚫 Upload test results on error
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tests-and-screenshot-tests-results
+          path: |
+            **/build/paparazzi/failures/
+            **/build/reports/tests/*UnitTest/
+
+      - name: 🚫 Modify summary on error
+        if: failure()
+        run: |
+          echo """## Tests failed!
+          
+          """ >> $GITHUB_STEP_SUMMARY
+          python3 .github/workflows/scripts/parse_test_failures.py . >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+
+      # https://github.com/codecov/codecov-action
+      - name: ☂️ Upload coverage reports to codecov
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: build/reports/kover/reportMerged.xml
+          verbose: true

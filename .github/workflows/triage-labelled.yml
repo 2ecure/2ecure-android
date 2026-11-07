@@ -1,0 +1,113 @@
+name: Move labelled issues to correct boards and columns
+
+on:
+  issues:
+    types: [labeled]
+
+permissions: {}
+
+jobs:
+  move_element_x_issues:
+    name: ElementX issues to ElementX project board
+    runs-on: ubuntu-latest
+    # Skip in forks
+    if: >
+      github.repository == 'element-hq/element-x-android'
+    steps:
+      - uses: actions/add-to-project@5afcf98fcd03f1c2f92c3c83f58ae24323cc57fd # v2
+        with:
+          project-url: https://github.com/orgs/element-hq/projects/43
+          github-token: ${{ secrets.ELEMENT_BOT_TOKEN }}
+
+  move_needs_info:
+    name: Move triaged needs info issues on board
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/add-to-project@5afcf98fcd03f1c2f92c3c83f58ae24323cc57fd # v2
+        id: addItem
+        with:
+          project-url: https://github.com/orgs/element-hq/projects/91
+          github-token: ${{ secrets.ELEMENT_BOT_TOKEN }}
+          labeled: X-Needs-Info
+      - name: Set the status of the item to "Needs info"
+        if: ${{ steps.addItem.outputs.itemId }}
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          ITEM_ID: ${{ steps.addItem.outputs.itemId }}
+        with:
+          github-token: ${{ secrets.ELEMENT_BOT_TOKEN }}
+          script: |
+            const { organization: { projectV2: project } } = await github.graphql(`
+              query {
+                organization(login: "element-hq") {
+                  projectV2(number: 91) {
+                    id
+                    field(name: "Status") {
+                      ... on ProjectV2SingleSelectField { id options { id name } }
+                    }
+                  }
+                }
+              }`);
+            const option = project.field?.options.find(option => option.name === "Needs info");
+            if (!option) {
+              core.setFailed('Option "Needs info" of the "Status" field not found in the project.');
+              return;
+            }
+            await github.graphql(`
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: { singleSelectOptionId: $optionId }
+                }) {
+                  projectV2Item { id }
+                }
+              }`, {
+              projectId: project.id,
+              itemId: process.env.ITEM_ID,
+              fieldId: project.field.id,
+              optionId: option.id,
+            });
+
+  ex_plorers:
+    name: Add labelled issues to X-Plorer project
+    runs-on: ubuntu-latest
+    if: >
+      github.event.label.name == 'Team: Element X Feature'
+    steps:
+      - uses: actions/add-to-project@5afcf98fcd03f1c2f92c3c83f58ae24323cc57fd # v2
+        with:
+          project-url: https://github.com/orgs/element-hq/projects/73
+          github-token: ${{ secrets.ELEMENT_BOT_TOKEN }}
+
+  verticals_feature:
+    name: Add labelled issues to Verticals Feature project
+    runs-on: ubuntu-latest
+    if: >
+      github.event.label.name == 'Team: Verticals Feature'
+    steps:
+      - uses: actions/add-to-project@5afcf98fcd03f1c2f92c3c83f58ae24323cc57fd # v2
+        with:
+          project-url: https://github.com/orgs/element-hq/projects/57
+          github-token: ${{ secrets.ELEMENT_BOT_TOKEN }}
+
+  qa:
+    name: Add labelled issues to QA project
+    runs-on: ubuntu-latest
+    if: >
+      github.event.label.name == 'Team: QA' ||
+      github.event.label.name == 'X-Needs-Signoff'
+    steps:
+      - uses: actions/add-to-project@5afcf98fcd03f1c2f92c3c83f58ae24323cc57fd # v2
+        with:
+          project-url: https://github.com/orgs/element-hq/projects/69
+          github-token: ${{ secrets.ELEMENT_BOT_TOKEN }}
+
+  signoff:
+    name: Add labelled issues to signoff project
+    runs-on: ubuntu-latest
+    if: >
+      github.event.label.name == 'X-Needs-Signoff'
+    steps:
+      - uses: actions/add-to-project@5afcf98fcd03f1c2f92c3c83f58ae24323cc57fd # v2
+        with:
+          project-url: https://github.com/orgs/element-hq/projects/89
+          github-token: ${{ secrets.ELEMENT_BOT_TOKEN }}

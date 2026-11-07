@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="screen_identity_confirmation_create_new_recovery_key">"ახალი აღდგენის გასაღების შექმნა"</string>
+  <string name="screen_identity_confirmation_subtitle">"დაადასტურეთ ეს მოწყობილობა უსაფრთხო მიმოწერისათვის."</string>
+  <string name="screen_identity_confirmation_title">"დაამტკიცეთ თქვენი პიროვნება"</string>
+  <string name="screen_identity_confirmed_subtitle">"ახლა თქვენ შეძლებთ შეტყობინებების წაკითხვას ან გაგზავნას უსაფრთხოდ, სხვა მომხმარებლებსაც შეუძლიათ ამ მოწყობილობას ენდონ."</string>
+  <string name="screen_identity_confirmed_title">"მოწყობილობა დადასტურებულია"</string>
+  <string name="screen_session_verification_compare_emojis_subtitle">"დაადასტურეთ, რომ ქვემოთ მოყვანილი ემოჯიები შეესაბამება თქვენს სხვა სესიაზე ნაჩვენებს."</string>
+  <string name="screen_session_verification_compare_emojis_title">"შეადარეთ ემოჯიები"</string>
+  <string name="screen_session_verification_compare_numbers_subtitle">"დაადასტურეთ, რომ ქვემოთ მოცემული ნომრები ემთხვევა თქვენს სხვა სესიაზე ნაჩვენები ნომრებს."</string>
+  <string name="screen_session_verification_compare_numbers_title">"შეადარეთ რიცხვები"</string>
+  <string name="screen_session_verification_complete_subtitle">"თქვენი ახალი სესია დადასტურებულია. მას აქვს წვდომა დაშიფრულ შეტყობინებებზე და სხვა მომხმარებლები მას სანდოდ ხედავენ."</string>
+  <string name="screen_session_verification_device_verified">"მოწყობილობა დადასტურებულია"</string>
+  <string name="screen_session_verification_enter_recovery_key">"შეიყვანეთ აღდგენის გასაღები"</string>
+  <string name="screen_session_verification_positive_button_verifying_ongoing">"ველოდებით დამთხვევას"</string>
+  <string name="screen_session_verification_ready_subtitle">"შეადარეთ ემოციების უნიკალური ნაკრები."</string>
+  <string name="screen_session_verification_they_dont_match">"ისინი არ ემთხვევიან ერთმანეთს"</string>
+  <string name="screen_session_verification_they_match">"ისინი ემთხვევიან ერთმანეთს"</string>
+  <string name="screen_session_verification_waiting_to_accept_title">"მოთხოვნის მიღებას ველოდებით"</string>
+</resources>

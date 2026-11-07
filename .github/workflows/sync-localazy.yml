@@ -1,0 +1,47 @@
+name: Sync Localazy
+on:
+  workflow_dispatch:
+  schedule:
+    # At 00:00 on every Monday UTC
+    - cron: '0 0 * * 1'
+
+permissions: {}
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx8g -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -Dkotlin.daemon.jvm.options=-Xmx4g
+
+jobs:
+  sync-localazy:
+    runs-on: ubuntu-latest
+    # Skip in forks
+    if: github.repository == 'element-hq/element-x-android'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Setup build environment
+        uses: $/.github/actions/setup-build
+        with:
+          python-version: 3.15
+      - name: Setup Localazy
+        run: |
+          curl -sS https://dist.localazy.com/debian/pubkey.gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/localazy.gpg
+          echo "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/localazy.gpg] https://maven.localazy.com/repository/apt/ stable main" | sudo tee /etc/apt/sources.list.d/localazy.list
+          sudo apt-get update && sudo apt-get install localazy
+      - name: Run Localazy script
+        run: |
+          ./tools/localazy/downloadStrings.sh --all
+          ./tools/localazy/importSupportedLocalesFromLocalazy.py
+          ./tools/test/generateAllScreenshots.py
+          ./tools/manifest/aaptDump.sh
+      - name: Create Pull Request for Strings
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ secrets.DANGER_GITHUB_API_TOKEN }}
+          commit-message: Sync Strings from Localazy
+          title: Sync Strings
+          body: |
+            - Update Strings from Localazy
+          branch: sync-localazy
+          base: develop
+          labels: PR-i18n
