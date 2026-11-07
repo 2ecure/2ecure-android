@@ -626,6 +626,16 @@ class LoggedInFlowNode(
         }
     }
 
+    // 2ecure: the sign-out screen of Settings, after a sign-out on the account page (RootFlowNode.onSignedOutOnAccountPage).
+    suspend fun attachSignOut() {
+        waitForNavTargetAttached { navTarget ->
+            navTarget is NavTarget.Home
+        }
+        attachChild<Node> {
+            backstack.push(NavTarget.Settings(PreferencesEntryPoint.InitialTarget.SignOut))
+        }
+    }
+
     suspend fun attachUser(userId: UserId) {
         waitForNavTargetAttached { navTarget ->
             navTarget is NavTarget.Home

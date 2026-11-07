@@ -24,7 +24,9 @@ import io.element.android.libraries.androidutils.browser.openUrlInChromeCustomTa
 import io.element.android.libraries.architecture.callback
 import io.element.android.libraries.di.SessionScope
 import io.element.android.libraries.emoji.api.picker.EmojiPickerRenderer
+import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.core.SessionId
+import io.element.android.libraries.matrix.api.permalink.AccountPageLinks
 
 @ContributesNode(SessionScope::class)
 @AssistedInject
@@ -33,6 +35,7 @@ class PreferencesRootNode(
     @Assisted plugins: List<Plugin>,
     private val presenter: PreferencesRootPresenter,
     private val emojiPickerRenderer: EmojiPickerRenderer,
+    private val matrixClient: MatrixClient,
 ) : Node(buildContext, plugins = plugins) {
     interface Callback : PreferencesAccountCallback, Plugin {
         fun navigateToAddAccount()
@@ -57,7 +60,8 @@ class PreferencesRootNode(
             activity.openUrlInChromeCustomTab(
                 null,
                 darkTheme = isDark,
-                url = it
+                // 2ecure: tells the account page which account the app is signed in to (AccountPageLinks).
+                url = AccountPageLinks.appUrl(it, matrixClient.sessionId.value)
             )
         }
     }

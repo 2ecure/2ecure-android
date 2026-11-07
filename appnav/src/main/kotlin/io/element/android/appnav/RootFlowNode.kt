@@ -582,7 +582,15 @@ class RootFlowNode(
             is ResolvedIntent.OAuth -> onOAuthAction(resolvedIntent.oAuthAction)
             is ResolvedIntent.Permalink -> navigateTo(resolvedIntent.permalinkData)
             is ResolvedIntent.IncomingShare -> onIncomingShare(resolvedIntent.shareIntentData)
+            ResolvedIntent.SignedOutOnAccountPage -> onSignedOutOnAccountPage()
         }
+    }
+
+    // 2ecure: signed out on the account page, opened from Settings of the current session: run the app's own sign-out,
+    // with its recovery key checks and confirmation, like «Sign out» in Settings.
+    private suspend fun onSignedOutOnAccountPage() {
+        val latestSessionId = sessionStore.getLatestSessionId() ?: return
+        attachSession(latestSessionId).attachSignOut()
     }
 
     private suspend fun onLoginLink(params: LoginParams) {

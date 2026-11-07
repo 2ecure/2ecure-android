@@ -32,6 +32,10 @@ interface PreferencesEntryPoint : FeatureEntryPoint {
 
         @Parcelize
         data object DeveloperSettings : InitialTarget
+
+        // 2ecure: straight to the sign-out screen, after a sign-out on the account page.
+        @Parcelize
+        data object SignOut : InitialTarget
     }
 
     data class Params(val initialElement: InitialTarget) : NodeInputs

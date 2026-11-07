@@ -16,6 +16,7 @@ import io.element.android.features.share.api.ShareIntentData
 import io.element.android.features.share.api.ShareIntentHandler
 import io.element.android.libraries.deeplink.api.DeeplinkData
 import io.element.android.libraries.deeplink.api.DeeplinkParser
+import io.element.android.libraries.matrix.api.permalink.AccountPageLinks
 import io.element.android.libraries.matrix.api.permalink.PermalinkData
 import io.element.android.libraries.matrix.api.permalink.PermalinkParser
 import io.element.android.libraries.oauth.api.OAuthAction
@@ -28,6 +29,9 @@ sealed interface ResolvedIntent {
     data class Permalink(val permalinkData: PermalinkData) : ResolvedIntent
     data class Login(val params: LoginParams) : ResolvedIntent
     data class IncomingShare(val shareIntentData: ShareIntentData) : ResolvedIntent
+
+    // 2ecure: «Sign out of account» on the account page hands back to the app (AccountPageLinks).
+    data object SignedOutOnAccountPage : ResolvedIntent
 }
 
 @Inject
@@ -44,6 +48,11 @@ class IntentResolver(
         // Coming from a notification?
         val deepLinkData = deeplinkParser.getFromIntent(intent)
         if (deepLinkData != null) return ResolvedIntent.Navigation(deepLinkData)
+
+        // 2ecure: signed out on the account page? It uses the OAuth redirect scheme, so check before OAuth.
+        if (intent.action == Intent.ACTION_VIEW && AccountPageLinks.isSignedOutLink(intent.dataString.orEmpty())) {
+            return ResolvedIntent.SignedOutOnAccountPage
+        }
 
         // Coming during login using OAuth?
         val oAuthAction = oAuthIntentResolver.resolve(intent)
