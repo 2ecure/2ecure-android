@@ -85,10 +85,11 @@ jobs:
           python3 .github/scripts/configure_firebase.py "$RUNNER_TEMP/google-services.json" .
           rm -f "$RUNNER_TEMP/google-services.json"
 
-      # The 2ecure patches with their own tests: sign-in (0019, provisioning links), enterprise service (0005, 0018),
-      # web client share links (0021) and the «Delete account» row of the account settings (0010, 0015).
-      - name: Unit tests (sign-in, enterprise service, share links, delete account)
-        run: ./gradlew :features:login:impl:testDebugUnitTest :features:enterprise:impl-foss:testDebugUnitTest :libraries:matrix:api:testDebugUnitTest :features:preferences:impl:testDebugUnitTest --tests '*.PreferencesAccountViewTest' $GRADLE_ARGS
+      # The 2ecure patches with their own tests: sign-in (0019, provisioning links; 0023, invitation QR codes), enterprise
+      # service (0005, 0018), location off (0009), web client, invitation and account page links (0021, 0023, 0024) and the
+      # «Delete account» row of the account settings (0010, 0015).
+      - name: Unit tests (sign-in, enterprise service, location, links, delete account)
+        run: ./gradlew :features:login:impl:testDebugUnitTest :features:enterprise:impl-foss:testDebugUnitTest :features:location:impl:testDebugUnitTest :libraries:matrix:api:testDebugUnitTest :features:preferences:impl:testDebugUnitTest --tests '*.PreferencesAccountViewTest' $GRADLE_ARGS
 
       - name: Build APKs
         env:
