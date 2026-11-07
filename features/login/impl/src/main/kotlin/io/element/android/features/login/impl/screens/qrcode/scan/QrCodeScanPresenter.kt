@@ -17,11 +17,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import dev.zacsweers.metro.Inject
+import io.element.android.features.enterprise.api.EnterpriseService
+import io.element.android.features.login.impl.changeserver.AccountProviderAccessException
 import io.element.android.features.login.impl.qrcode.QrCodeLoginManager
 import io.element.android.libraries.architecture.AsyncAction
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.architecture.runCatchingUpdatingState
 import io.element.android.libraries.core.coroutine.CoroutineDispatchers
+import io.element.android.libraries.matrix.api.accountprovider.AccountProvider
 import io.element.android.libraries.matrix.api.auth.qrlogin.MatrixQrCodeLoginData
 import io.element.android.libraries.matrix.api.auth.qrlogin.MatrixQrCodeLoginDataFactory
 import io.element.android.libraries.matrix.api.auth.qrlogin.QrCodeLoginStep
@@ -39,6 +42,7 @@ class QrCodeScanPresenter(
     private val qrCodeLoginDataFactory: MatrixQrCodeLoginDataFactory,
     private val qrCodeLoginManager: QrCodeLoginManager,
     private val coroutineDispatchers: CoroutineDispatchers,
+    private val enterpriseService: EnterpriseService,
 ) : Presenter<QrCodeScanState> {
     private var isScanning by mutableStateOf(true)
     private var invitationCode by mutableStateOf<String?>(null)
@@ -105,10 +109,30 @@ class QrCodeScanPresenter(
                 val data = qrCodeLoginDataFactory.parseQrCodeData(code).onFailure {
                     Timber.e(it, "Error parsing QR code data")
                 }.getOrThrow()
+                assertIsAllowedServer(data)
                 data
             }.runCatchingUpdatingState(codeScannedAction)
         }.invokeOnCompletion {
             isProcessingCode.set(false)
+        }
+    }
+
+    /**
+     * 2ecure: a code shown by a device signed in to another server must not sign this app in there. The 2025 version
+     * of MSC4108 names the homeserver's base URL (which the login connects to), the 2024 version its server name. A
+     * code with neither comes from a device that is not signed in, which the login reports itself.
+     */
+    @Throws(AccountProviderAccessException::class)
+    private suspend fun assertIsAllowedServer(data: MatrixQrCodeLoginData) {
+        val server = data.baseUrl() ?: data.serverName()
+        if (server.isNullOrBlank()) return
+        val accountProvider = AccountProvider.Generic(server)
+        if (!enterpriseService.isAllowedToConnectToAccountProvider(accountProvider)) {
+            Timber.w("QR code for another server: ${accountProvider.friendlyServerName()}")
+            throw AccountProviderAccessException.UnauthorizedAccountProviderException(
+                unauthorisedAccountProviderTitle = accountProvider.friendlyServerName(),
+                authorisedAccountProviderTitles = enterpriseService.accountProviderAllowList().map { it.friendlyServerName() },
+            )
         }
     }
 }

@@ -16,4 +16,7 @@ package io.element.android.libraries.matrix.api.auth.qrlogin
 interface MatrixQrCodeLoginData {
     /** The homeserver advertised by the QR code, or `null` when it does not carry one. */
     fun serverName(): String?
+
+    /** The homeserver's base URL advertised by the QR code (2025 version of MSC4108), or `null` when it does not carry one. */
+    fun baseUrl(): String?
 }

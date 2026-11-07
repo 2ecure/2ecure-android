@@ -24,6 +24,8 @@ class FakeMatrixQrCodeLoginDataFactory(
 
 class FakeMatrixQrCodeLoginData(
     private val serverNameResult: () -> String? = { lambdaError() },
+    private val baseUrlResult: () -> String? = { null },
 ) : MatrixQrCodeLoginData {
     override fun serverName() = serverNameResult()
+    override fun baseUrl() = baseUrlResult()
 }

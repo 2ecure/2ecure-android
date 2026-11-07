@@ -17,4 +17,8 @@ class SdkQrCodeLoginData(
     override fun serverName(): String? {
         return rustQrCodeData.serverName()
     }
+
+    override fun baseUrl(): String? {
+        return rustQrCodeData.baseUrl()
+    }
 }
