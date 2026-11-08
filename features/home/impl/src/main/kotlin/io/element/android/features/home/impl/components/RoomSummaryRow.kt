@@ -69,7 +69,8 @@ import io.element.android.libraries.matrix.ui.model.InviteSender
 import io.element.android.libraries.ui.strings.CommonStrings
 import timber.log.Timber
 
-internal val minHeight = 84.dp
+// 2ecure: one line of message preview instead of two (was 84.dp); the 52.dp avatar plus padding now sets the height.
+internal val minHeight = 74.dp
 
 @Composable
 internal fun RoomSummaryRow(
@@ -130,6 +131,7 @@ internal fun RoomSummaryRow(
                         timestamp = room.timestamp,
                         isHighlighted = room.isHighlighted,
                         dmUserStatus = room.dmUserStatus,
+                        showsRoomIcon = !room.isDm,
                     )
                     MessagePreviewAndIndicatorRow(room = room, showUnreadCount = showUnreadCount, showAllActivity = showAllActivity)
                 }
@@ -223,21 +225,37 @@ private fun NameAndTimestampRow(
     timestamp: String?,
     isHighlighted: Boolean,
     dmUserStatus: DisplayedStatus?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showsRoomIcon: Boolean = false,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = spacedBy(16.dp)
     ) {
         val displayName = name?.toSafeLength(ellipsize = true) ?: stringResource(id = CommonStrings.common_no_room_name)
-        DisplayNameWithStatus(
-            name = displayName,
-            status = dmUserStatus,
+        Row(
             modifier = Modifier.weight(1f),
-            style = ElementTheme.typography.fontBodyLgMedium,
-            nameColor = ElementTheme.colors.roomListRoomName,
-            nameFontStyle = FontStyle.Italic.takeIf { name == null },
-        )
+            horizontalArrangement = spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // 2ecure: a group icon tells rooms apart from one-to-one chats.
+            if (showsRoomIcon) {
+                Icon(
+                    modifier = Modifier.size(20.dp),
+                    imageVector = CompoundIcons.Group(),
+                    contentDescription = stringResource(CommonStrings.common_room),
+                    tint = ElementTheme.colors.iconSecondary,
+                )
+            }
+            DisplayNameWithStatus(
+                name = displayName,
+                status = dmUserStatus,
+                modifier = Modifier.weight(1f),
+                style = ElementTheme.typography.fontBodyLgMedium,
+                nameColor = ElementTheme.colors.roomListRoomName,
+                nameFontStyle = FontStyle.Italic.takeIf { name == null },
+            )
+        }
         // Timestamp
         Text(
             text = timestamp ?: "",
@@ -290,8 +308,8 @@ private fun MessagePreviewAndIndicatorRow(
                 text = stringResource(R.string.screen_roomlist_tombstoned_room_description),
                 color = ElementTheme.colors.roomListRoomMessage,
                 style = ElementTheme.typography.fontBodyMdRegular,
-                minLines = 2,
-                maxLines = 2,
+                minLines = 1,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
         } else {
@@ -311,8 +329,8 @@ private fun MessagePreviewAndIndicatorRow(
                     text = stringResource(CommonStrings.common_message_failed_to_send),
                     color = ElementTheme.colors.textCriticalPrimary,
                     style = ElementTheme.typography.fontBodyMdRegular,
-                    minLines = 2,
-                    maxLines = 2,
+                    minLines = 1,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             } else {
@@ -336,8 +354,8 @@ private fun MessagePreviewAndIndicatorRow(
                     text = annotatedMessagePreview,
                     color = ElementTheme.colors.roomListRoomMessage,
                     style = ElementTheme.typography.fontBodyMdRegular,
-                    minLines = 2,
-                    maxLines = 2,
+                    minLines = 1,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }

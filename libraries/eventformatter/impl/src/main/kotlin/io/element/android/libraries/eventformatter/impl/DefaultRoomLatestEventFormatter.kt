@@ -178,11 +178,12 @@ class DefaultRoomLatestEventFormatter(
         return message.prefixIfNeeded(senderDisambiguatedDisplayName, isDmRoom, isOutgoing)
     }
 
+    // 2ecure: in a DM only the other person's name is left out; your own messages keep «You:».
     private fun CharSequence.prefixIfNeeded(
         senderDisambiguatedDisplayName: String,
         isDmRoom: Boolean,
         isOutgoing: Boolean,
-    ): CharSequence = if (isDmRoom) {
+    ): CharSequence = if (isDmRoom && !isOutgoing) {
         this
     } else {
         prefixWith(

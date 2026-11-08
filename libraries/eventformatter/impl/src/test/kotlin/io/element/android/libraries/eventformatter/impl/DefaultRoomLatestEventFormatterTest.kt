@@ -237,8 +237,8 @@ class DefaultRoomLatestEventFormatterTest : RobolectricTest() {
             }
         }
 
-        // Verify results of DM mode
-        for ((type, result) in resultsInDm) {
+        // Verify results of DM mode (2ecure: your own messages keep «You:» in a DM, checked against room mode below)
+        for ((type, result) in resultsInDm.takeUnless { sentByYou }.orEmpty()) {
             val string = result.toString()
             val expectedResult = when (type) {
                 is VideoMessageType -> "Video: Shared body"
@@ -313,6 +313,12 @@ class DefaultRoomLatestEventFormatterTest : RobolectricTest() {
                     .isInstanceOf(AnnotatedString::class.java)
             }
             assertWithMessage("$type was not properly handled for room").that(string).isEqualTo(expectedResult)
+        }
+
+        // 2ecure: in a DM your own messages are prefixed with «You:», as in a room.
+        if (sentByYou) {
+            assertThat(resultsInDm.map { (type, result) -> type to result.toString() })
+                .isEqualTo(resultsInRoom.map { (type, result) -> type to result.toString() })
         }
     }
 
@@ -937,7 +943,8 @@ class DefaultRoomLatestEventFormatterTest : RobolectricTest() {
         val pollContent = aPollContent()
 
         val mineContentEvent = createLatestEvent(sentByYou = true, senderDisplayName = "Alice", content = pollContent)
-        assertThat(formatter.format(mineContentEvent, true).toString()).isEqualTo("Poll: Do you like polls?")
+        // 2ecure: your own message keeps «You:» in a DM.
+        assertThat(formatter.format(mineContentEvent, true).toString()).isEqualTo("You: Poll: Do you like polls?")
 
         val contentEvent = createLatestEvent(sentByYou = false, senderDisplayName = "Bob", content = pollContent)
         assertThat(formatter.format(contentEvent, true).toString()).isEqualTo("Poll: Do you like polls?")
