@@ -38,14 +38,14 @@ value class ChatBackgroundColour(val rgb: Int) {
 
     fun toColor(): Color = Color(0xFF shl 24 or (rgb and 0xFFFFFF))
 
-    /** The colour patterns draw in: the base a little darker, or lighter when the base is dark. */
+    /** The colour patterns draw in: the base very slightly darker, or lighter when the base is dark (5 % / 6 %). */
     val motif: ChatBackgroundColour
         get() {
             val red = (rgb shr 16 and 0xFF) / 255.0
             val green = (rgb shr 8 and 0xFF) / 255.0
             val blue = (rgb and 0xFF) / 255.0
             val luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue
-            fun channel(value: Double): Int = ((if (luminance > 0.5) value * 0.84 else value + 0.2 * (1 - value)) * 255).roundToInt()
+            fun channel(value: Double): Int = ((if (luminance > 0.5) value * 0.95 else value + 0.06 * (1 - value)) * 255).roundToInt()
             return ChatBackgroundColour(channel(red) shl 16 or (channel(green) shl 8) or channel(blue))
         }
 

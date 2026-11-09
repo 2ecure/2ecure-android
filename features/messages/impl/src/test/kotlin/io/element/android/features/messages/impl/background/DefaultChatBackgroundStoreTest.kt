@@ -79,9 +79,9 @@ class DefaultChatBackgroundStoreTest {
     }
 
     @Test
-    fun `patterns draw a little darker on light colours and lighter on dark ones`() {
-        assertThat(ChatBackgroundColour(0xDCE6F2).motif.hex).isEqualTo("#B9C1CB")
-        assertThat(ChatBackgroundColour(0x203040).motif.hex).isEqualTo("#4D5966")
+    fun `patterns draw very slightly darker on light colours and lighter on dark ones`() {
+        assertThat(ChatBackgroundColour(0xDCE6F2).motif.hex).isEqualTo("#D1DBE6")
+        assertThat(ChatBackgroundColour(0x203040).motif.hex).isEqualTo("#2D3C4B")
         assertThat(ChatBackgroundColour.fromHex("#5b8def")).isEqualTo(ChatBackgroundColour(0x5B8DEF))
         assertThat(ChatBackgroundColour.fromHex("5B8DEF")).isNull()
     }
