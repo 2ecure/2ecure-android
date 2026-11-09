@@ -402,15 +402,17 @@ class DefaultNotifiableEventResolver(
             is VoiceMessageType -> stringProvider.getString(CommonStrings.common_voice_message)
             is EmoteMessageType -> "* $senderDisambiguatedDisplayName ${messageType.body}"
             is FileMessageType -> messageType.bestDescription
+            // 2ecure: an image, video or sticker without a caption is named by its type, not its file name (mostly an ID,
+            // such as the UUID an iPhone names its photos after).
             is ImageMessageType -> if (hasImageUri) {
                 messageType.caption
             } else {
-                messageType.bestDescription
+                messageType.caption ?: stringProvider.getString(CommonStrings.common_image)
             }
-            is StickerMessageType -> messageType.bestDescription
+            is StickerMessageType -> messageType.caption ?: stringProvider.getString(CommonStrings.common_sticker)
             is NoticeMessageType -> messageType.body
             is TextMessageType -> messageType.toPlainText(permalinkParser = permalinkParser)
-            is VideoMessageType -> messageType.bestDescription
+            is VideoMessageType -> messageType.caption ?: stringProvider.getString(CommonStrings.common_video)
             is LocationMessageType -> messageType.body
             is GalleryMessageType -> messageType.body
             is OtherMessageType -> messageType.body

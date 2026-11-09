@@ -288,6 +288,37 @@ class DefaultNotifiableEventResolverTest : RobolectricTest() {
     }
 
     @Test
+    fun `resolve event message image or video without caption shows the type, not the file name`() = runTest {
+        val imageEventId = AN_EVENT_ID
+        val videoEventId = AN_EVENT_ID_2
+        val sut = createDefaultNotifiableEventResolver(
+            notificationResult = Result.success(
+                mapOf(
+                    imageEventId to Result.success(aNotificationData(
+                        content = NotificationContent.MessageLike.RoomMessage(
+                            senderId = A_USER_ID_2,
+                            messageType = ImageMessageType("16D5A7B3-E4ED-4855-B4A2-1D9B0C1E2F3A.jpeg", null, null, MediaSource("url"), null),
+                        ),
+                    )),
+                    videoEventId to Result.success(aNotificationData(
+                        content = NotificationContent.MessageLike.RoomMessage(
+                            senderId = A_USER_ID_2,
+                            messageType = VideoMessageType("IMG_0042.MOV", null, null, MediaSource("url"), null),
+                        ),
+                    )),
+                )
+            )
+        )
+        val imageRequest = aPushRequest(A_SESSION_ID, A_ROOM_ID, imageEventId, "firebase")
+        val videoRequest = aPushRequest(A_SESSION_ID, A_ROOM_ID, videoEventId, "firebase")
+        val result = sut.resolveEvents(A_SESSION_ID, listOf(imageRequest, videoRequest))
+        assertThat((result.getEvent(imageRequest)?.getOrNull() as? ResolvedPushEvent.Event)?.notifiableEvent?.let { (it as NotifiableMessageEvent).body })
+            .isEqualTo("Image")
+        assertThat((result.getEvent(videoRequest)?.getOrNull() as? ResolvedPushEvent.Event)?.notifiableEvent?.let { (it as NotifiableMessageEvent).body })
+            .isEqualTo("Video")
+    }
+
+    @Test
     fun `resolve event message sticker`() = runTest {
         val sut = createDefaultNotifiableEventResolver(
             notificationResult = Result.success(

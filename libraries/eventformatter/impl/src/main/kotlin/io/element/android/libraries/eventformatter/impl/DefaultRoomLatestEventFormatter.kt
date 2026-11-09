@@ -30,6 +30,7 @@ import io.element.android.libraries.matrix.api.timeline.item.event.LiveLocationC
 import io.element.android.libraries.matrix.api.timeline.item.event.LocationMessageType
 import io.element.android.libraries.matrix.api.timeline.item.event.MessageContent
 import io.element.android.libraries.matrix.api.timeline.item.event.MessageType
+import io.element.android.libraries.matrix.api.timeline.item.event.MessageTypeWithAttachment
 import io.element.android.libraries.matrix.api.timeline.item.event.NoticeMessageType
 import io.element.android.libraries.matrix.api.timeline.item.event.OtherMessageType
 import io.element.android.libraries.matrix.api.timeline.item.event.PollContent
@@ -141,13 +142,13 @@ class DefaultRoomLatestEventFormatter(
                 messageType.toPlainText(permalinkParser)
             }
             is VideoMessageType -> {
-                messageType.toPlainText(permalinkParser).prefixWith(sp.getString(CommonStrings.common_video))
+                messageType.captionOrType(sp.getString(CommonStrings.common_video))
             }
             is ImageMessageType -> {
-                messageType.toPlainText(permalinkParser).prefixWith(sp.getString(CommonStrings.common_image))
+                messageType.captionOrType(sp.getString(CommonStrings.common_image))
             }
             is StickerMessageType -> {
-                messageType.toPlainText(permalinkParser).prefixWith(sp.getString(CommonStrings.common_sticker))
+                messageType.captionOrType(sp.getString(CommonStrings.common_sticker))
             }
             is LocationMessageType -> {
                 sp.getString(CommonStrings.common_shared_location)
@@ -177,6 +178,11 @@ class DefaultRoomLatestEventFormatter(
         }
         return message.prefixIfNeeded(senderDisambiguatedDisplayName, isDmRoom, isOutgoing)
     }
+
+    // 2ecure: an image, video or sticker without a caption shows its type alone, like a voice message. Its file name is
+    // mostly an ID made by a camera or an app (an iPhone names its photos after a UUID), nothing to read.
+    private fun MessageTypeWithAttachment.captionOrType(type: String): CharSequence =
+        toPlainText(permalinkParser, "").takeIf { it.isNotEmpty() }?.prefixWith(type) ?: type
 
     // 2ecure: in a DM only the other person's name is left out; your own messages keep «You:».
     private fun CharSequence.prefixIfNeeded(

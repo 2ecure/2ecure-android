@@ -97,6 +97,21 @@ class DefaultRoomLatestEventFormatterTest : RobolectricTest() {
 
     @Test
     @Config(qualifiers = "en")
+    fun `An image shows its caption, or only its type without one`() {
+        fun format(type: MessageType) = formatter.format(
+            createLatestEvent(false, null, MessageContent("16D5A7B3-E4ED-4855-B4A2-1D9B0C1E2F3A.jpeg", null, false, null, type)),
+            true,
+        ).toString()
+        assertThat(format(ImageMessageType("16D5A7B3-E4ED-4855-B4A2-1D9B0C1E2F3A.jpeg", null, null, MediaSource("url"), null)))
+            .isEqualTo("Image")
+        assertThat(format(ImageMessageType("16D5A7B3-E4ED-4855-B4A2-1D9B0C1E2F3A.jpeg", "At the lake", null, MediaSource("url"), null)))
+            .isEqualTo("Image: At the lake")
+        assertThat(format(VideoMessageType("IMG_0042.MOV", null, null, MediaSource("url"), null))).isEqualTo("Video")
+        assertThat(format(FileMessageType("Invoice.pdf", null, null, MediaSource("url"), null))).isEqualTo("File: Invoice.pdf")
+    }
+
+    @Test
+    @Config(qualifiers = "en")
     fun `Sticker content`() {
         val body = "a sticker body"
         val info = ImageInfo(null, null, null, null, null, null, null)
@@ -241,12 +256,13 @@ class DefaultRoomLatestEventFormatterTest : RobolectricTest() {
         for ((type, result) in resultsInDm.takeUnless { sentByYou }.orEmpty()) {
             val string = result.toString()
             val expectedResult = when (type) {
-                is VideoMessageType -> "Video: Shared body"
+                // 2ecure: without a caption, images, videos and stickers show their type alone, not the file name.
+                is VideoMessageType -> "Video"
                 is AudioMessageType -> "Audio: Shared body"
                 is VoiceMessageType -> "Voice message"
-                is ImageMessageType -> "Image: Shared body"
+                is ImageMessageType -> "Image"
                 is GalleryMessageType -> "Gallery: Shared body"
-                is StickerMessageType -> "Sticker: Shared body"
+                is StickerMessageType -> "Sticker"
                 is FileMessageType -> "File: Shared body"
                 is LocationMessageType -> "Shared location"
                 is EmoteMessageType -> "* ⁨$senderName⁩ ${type.body}"
@@ -255,11 +271,11 @@ class DefaultRoomLatestEventFormatterTest : RobolectricTest() {
                 is OtherMessageType -> body
             }
             val shouldCreateAnnotatedString = when (type) {
-                is VideoMessageType -> true
+                is VideoMessageType -> false
                 is AudioMessageType -> true
                 is VoiceMessageType -> false
-                is ImageMessageType -> true
-                is StickerMessageType -> true
+                is ImageMessageType -> false
+                is StickerMessageType -> false
                 is FileMessageType -> true
                 is LocationMessageType -> false
                 is EmoteMessageType -> false
@@ -280,12 +296,12 @@ class DefaultRoomLatestEventFormatterTest : RobolectricTest() {
         for ((type, result) in resultsInRoom) {
             val string = result.toString()
             val expectedResult = when (type) {
-                is VideoMessageType -> "$expectedPrefix: Video: Shared body"
+                is VideoMessageType -> "$expectedPrefix: Video"
                 is AudioMessageType -> "$expectedPrefix: Audio: Shared body"
                 is VoiceMessageType -> "$expectedPrefix: Voice message"
-                is ImageMessageType -> "$expectedPrefix: Image: Shared body"
+                is ImageMessageType -> "$expectedPrefix: Image"
                 is GalleryMessageType -> "$expectedPrefix: Gallery: Shared body"
-                is StickerMessageType -> "$expectedPrefix: Sticker: Shared body"
+                is StickerMessageType -> "$expectedPrefix: Sticker"
                 is FileMessageType -> "$expectedPrefix: File: Shared body"
                 is LocationMessageType -> "$expectedPrefix: Shared location"
                 is TextMessageType,
