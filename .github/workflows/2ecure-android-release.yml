@@ -24,8 +24,9 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # Private-repository runners have less memory than Element's public ones (upstream: -Xmx8g in gradle.properties).
-  GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8 -XX:+UseG1GC"
+  # Private-repository runners had less memory than Element's public ones (upstream: -Xmx8g in gradle.properties).
+  # The repository is public since 2026-10-13 (16 GB runners); with 5g, packaging the APKs ran out of heap in run #17.
+  GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx7g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8 -XX:+UseG1GC"
   GRADLE_ARGS: --stacktrace --no-daemon --no-configuration-cache --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process -Dsonar.gradle.skipCompile=true -Ptwoecure.buildNumber=${{ inputs.build_number }}
 
 jobs:
