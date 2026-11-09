@@ -15,8 +15,10 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -30,6 +32,7 @@ import dev.zacsweers.metro.AssistedInject
 import io.element.android.annotations.ContributesNode
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.features.knockrequests.api.banner.KnockRequestsBannerRenderer
+import io.element.android.features.messages.api.background.ChatBackgroundStore
 import io.element.android.features.messages.impl.actionlist.ActionListPresenter
 import io.element.android.features.messages.impl.actionlist.model.TimelineItemActionPostProcessor
 import io.element.android.features.messages.impl.attachments.Attachment
@@ -104,6 +107,7 @@ class MessagesNode(
     private val eventContentValidationCache: EventContentValidationCache,
     private val emojiPickerRenderer: EmojiPickerRenderer,
     private val timelineController: TimelineController,
+    private val chatBackgroundStore: ChatBackgroundStore,
 ) : Node(buildContext, plugins = plugins), MessagesNavigator, TimelineSelectionOwner {
     data class Inputs(
         val focusedEventId: EventId?,
@@ -275,6 +279,11 @@ class MessagesNode(
             LocalEventContentValidationState provides eventContentValidationCache,
         ) {
             val state = presenter.present()
+            // 2ecure: the chat's background, also when it's changed in the chat settings.
+            val chatBackground by remember { chatBackgroundStore.backgroundFlow(room.roomId) }.collectAsState(initial = null)
+            LaunchedEffect(Unit) {
+                chatBackgroundStore.refresh()
+            }
 
             BackHandler {
                 state.eventSink(MessagesEvent.MarkAsFullyReadAndExit)
@@ -326,6 +335,7 @@ class MessagesNode(
                 },
                 onViewAllPinnedMessagesClick = callback::navigateToPinnedMessagesList,
                 modifier = modifier,
+                chatBackground = chatBackground,
                 knockRequestsBannerView = {
                     knockRequestsBannerRenderer.View(
                         modifier = Modifier,

@@ -62,7 +62,9 @@ import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.features.location.api.LiveLocationSharingBanner
+import io.element.android.features.messages.api.background.ChatBackground
 import io.element.android.features.messages.api.timeline.voicemessages.composer.VoiceMessageComposerEvent
+import io.element.android.features.messages.impl.background.ChatBackgroundView
 import io.element.android.features.messages.impl.actionlist.ActionListEvent
 import io.element.android.features.messages.impl.actionlist.ActionListView
 import io.element.android.features.messages.impl.actionlist.model.TimelineItemAction
@@ -163,6 +165,8 @@ fun MessagesView(
     knockRequestsBannerView: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     forceJumpToBottomVisibility: Boolean = false,
+    // 2ecure: the background only this account sees behind the timeline.
+    chatBackground: ChatBackground? = null,
     customReactionBottomSheet: @Composable () -> Unit,
 ) {
     val eventContentValidationState = LocalEventContentValidationState.current
@@ -309,6 +313,7 @@ fun MessagesView(
                     ) {
                         MessagesViewContent(
                             state = state,
+                            chatBackground = chatBackground,
                             onContentClick = ::onContentClick,
                             onGalleryItemClick = { event, index ->
                                 val hideKeyboard = onGalleryEventItemClick(
@@ -547,6 +552,7 @@ private fun ReinviteDialog(state: MessagesState) {
 @Composable
 private fun MessagesViewContent(
     state: MessagesState,
+    chatBackground: ChatBackground?,
     onContentClick: (TimelineItem.Event) -> Unit,
     onUserDataClick: (MatrixUser) -> Unit,
     onLinkClick: (Link, Boolean) -> Unit,
@@ -596,6 +602,10 @@ private fun MessagesViewContent(
         }
 
         Box {
+            // 2ecure: the chat's background.
+            if (chatBackground != null) {
+                ChatBackgroundView(background = chatBackground, modifier = Modifier.matchParentSize())
+            }
             val scrollBehavior = PinnedMessagesBannerViewDefaults.rememberScrollBehavior(
                 pinnedMessagesCount = (state.pinnedMessagesBannerState as? PinnedMessagesBannerState.Visible)?.pinnedMessagesCount() ?: 0,
             )

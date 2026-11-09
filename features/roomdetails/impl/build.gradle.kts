@@ -46,6 +46,8 @@ dependencies {
     implementation(projects.services.analytics.compose)
     implementation(projects.features.poll.api)
     implementation(projects.features.messages.api)
+    // 2ecure: the chat background picker
+    implementation(projects.libraries.mediapickers.api)
     implementation(projects.features.roomcall.api)
     implementation(projects.features.knockrequests.api)
     implementation(projects.features.verifysession.api)
@@ -67,6 +69,7 @@ dependencies {
     testImplementation(projects.features.roomdetailsedit.test)
     testImplementation(projects.features.knockrequests.test)
     testImplementation(projects.features.messages.test)
+    testImplementation(projects.libraries.mediapickers.test)
     testImplementation(projects.features.poll.test)
     testImplementation(projects.features.reportroom.test)
     testImplementation(projects.features.verifysession.test)

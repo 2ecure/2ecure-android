@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2ecure: chat backgrounds (ChatBackgroundPickerView). -->
+<resources>
+    <string name="twoecure_chat_background_title">Sfondo della chat</string>
+    <string name="twoecure_chat_background_none">Nessuno sfondo</string>
+    <string name="twoecure_chat_background_photo">Foto</string>
+    <string name="twoecure_chat_background_colours">Colori</string>
+    <string name="twoecure_chat_background_footer">Solo tu vedi questo sfondo. Viene salvato nel tuo account, così lo mostrano anche i tuoi altri dispositivi. Una foto viene salvata sul server di 2ecure senza crittografia end-to-end.</string>
+    <string name="twoecure_chat_background_error">Impossibile salvare lo sfondo.</string>
+    <string name="twoecure_chat_background_sky">Cielo</string>
+    <string name="twoecure_chat_background_sea">Mare</string>
+    <string name="twoecure_chat_background_forest">Bosco</string>
+    <string name="twoecure_chat_background_sand">Sabbia</string>
+    <string name="twoecure_chat_background_rose">Rosa</string>
+    <string name="twoecure_chat_background_lavender">Lavanda</string>
+</resources>

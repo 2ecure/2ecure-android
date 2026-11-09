@@ -122,6 +122,8 @@ fun RoomDetailsView(
     onProfileClick: (UserId) -> Unit,
     onReportRoomClick: () -> Unit,
     modifier: Modifier = Modifier,
+    // 2ecure: opens the chat background picker.
+    onChatBackgroundClick: () -> Unit = {},
     leaveRoomView: @Composable () -> Unit,
 ) {
     val snackbarHostState = rememberSnackbarHostState(snackbarMessage = state.snackbarMessage)
@@ -302,6 +304,10 @@ fun RoomDetailsView(
                     onFavoriteChanges = {
                         state.eventSink(RoomDetailsEvent.SetFavorite(it))
                     }
+                )
+                // 2ecure: a background that only this account sees, on all its devices.
+                ChatBackgroundItem(
+                    onClick = onChatBackgroundClick
                 )
                 if (state.canShowSecurityAndPrivacy && state.roomType is RoomDetailsType.Room) {
                     SecurityAndPrivacyItem(
@@ -814,6 +820,17 @@ private fun PollsItem(
         content = { Text(stringResource(R.string.screen_polls_history_title)) },
         leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Polls())),
         onClick = openPollHistory,
+    )
+}
+
+@Composable
+private fun ChatBackgroundItem(
+    onClick: () -> Unit,
+) {
+    ListItem(
+        content = { Text(stringResource(R.string.twoecure_chat_background_title)) },
+        leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Image())),
+        onClick = onClick,
     )
 }
 

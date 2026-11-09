@@ -35,6 +35,7 @@ import io.element.android.features.rolesandpermissions.api.ChangeRoomMemberRoles
 import io.element.android.features.rolesandpermissions.api.ChangeRoomMemberRolesListType
 import io.element.android.features.rolesandpermissions.api.RolesAndPermissionsEntryPoint
 import io.element.android.features.roomdetails.api.RoomDetailsEntryPoint
+import io.element.android.features.roomdetails.impl.chatbackground.ChatBackgroundPickerNode
 import io.element.android.features.roomdetails.impl.invite.RoomInviteMembersNode
 import io.element.android.features.roomdetails.impl.members.RoomMemberListNode
 import io.element.android.features.roomdetails.impl.members.details.RoomMemberDetailsNode
@@ -149,6 +150,10 @@ class RoomDetailsFlowNode(
 
         @Parcelize
         data object SelectNewOwnersWhenLeaving : NavTarget
+
+        // 2ecure
+        @Parcelize
+        data object ChatBackgroundPicker : NavTarget
     }
 
     private val callback: RoomDetailsEntryPoint.Callback = callback()
@@ -206,6 +211,10 @@ class RoomDetailsFlowNode(
 
                     override fun navigateToMediaGallery() {
                         backstack.push(NavTarget.MediaGallery)
+                    }
+
+                    override fun navigateToChatBackground() {
+                        backstack.push(NavTarget.ChatBackgroundPicker)
                     }
 
                     override fun navigateToAdminSettings() {
@@ -351,6 +360,9 @@ class RoomDetailsFlowNode(
             }
             is NavTarget.PollHistory -> {
                 pollHistoryEntryPoint.createNode(this, buildContext)
+            }
+            is NavTarget.ChatBackgroundPicker -> {
+                createNode<ChatBackgroundPickerNode>(buildContext)
             }
             is NavTarget.MediaGallery -> {
                 val callback = object : MediaGalleryEntryPoint.Callback {
