@@ -35,6 +35,7 @@ import io.element.android.features.knockrequests.api.banner.KnockRequestsBannerR
 import io.element.android.features.messages.api.background.ChatBackgroundStore
 import io.element.android.features.messages.impl.actionlist.ActionListPresenter
 import io.element.android.features.messages.impl.actionlist.model.TimelineItemActionPostProcessor
+import io.element.android.features.messages.impl.background.LocalHasChatBackground
 import io.element.android.features.messages.impl.attachments.Attachment
 import io.element.android.features.messages.impl.messagecomposer.MessageComposerEvent
 import io.element.android.features.messages.impl.messagecomposer.MessageComposerPresenter
@@ -274,16 +275,17 @@ class MessagesNode(
         val activity = requireNotNull(LocalActivity.current)
         val isDark = ElementTheme.isLightTheme.not()
         val canUseOverlay = !isTalkbackActive() && !hasExternalKeyboard()
+        // 2ecure: the chat's background, also when it's changed in the chat settings.
+        val chatBackground by remember { chatBackgroundStore.backgroundFlow(room.roomId) }.collectAsState(initial = null)
+        LaunchedEffect(Unit) {
+            chatBackgroundStore.refresh()
+        }
         CompositionLocalProvider(
             LocalTimelineItemPresenterFactories provides timelineItemPresenterFactories,
             LocalEventContentValidationState provides eventContentValidationCache,
+            LocalHasChatBackground provides (chatBackground != null),
         ) {
             val state = presenter.present()
-            // 2ecure: the chat's background, also when it's changed in the chat settings.
-            val chatBackground by remember { chatBackgroundStore.backgroundFlow(room.roomId) }.collectAsState(initial = null)
-            LaunchedEffect(Unit) {
-                chatBackgroundStore.refresh()
-            }
 
             BackHandler {
                 state.eventSink(MessagesEvent.MarkAsFullyReadAndExit)

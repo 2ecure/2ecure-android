@@ -17,7 +17,9 @@ import androidx.exifinterface.media.ExifInterface
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import io.element.android.features.messages.api.background.ChatBackground
+import io.element.android.features.messages.api.background.ChatBackgroundColour
 import io.element.android.features.messages.api.background.ChatBackgroundGradient
+import io.element.android.features.messages.api.background.ChatBackgroundPattern
 import io.element.android.features.messages.api.background.ChatBackgroundStore
 import io.element.android.libraries.core.coroutine.CoroutineDispatchers
 import io.element.android.libraries.core.mimetype.MimeTypes
@@ -33,10 +35,13 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.add
 import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonArray
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import kotlin.math.max
@@ -161,7 +166,18 @@ internal object ChatBackgroundContent {
 
     /** One room's entry; `null` for a kind or gradient this version doesn't know. */
     private fun background(entry: JsonObject): ChatBackground? = when (entry.string("type")) {
-        "gradient" -> entry.string("id")?.let { ChatBackgroundGradient.fromId(it) }?.let { ChatBackground.Gradient(it) }
+        "gradient" -> if (entry.containsKey("id")) {
+            entry.string("id")?.let { ChatBackgroundGradient.fromId(it) }?.let { ChatBackground.Gradient(it) }
+        } else {
+            val colours = (entry["colours"] as? JsonArray)?.map { (it as? JsonPrimitive)?.takeIf { p -> p.isString }?.content?.let { ChatBackgroundColour.fromHex(it) } }
+            if (colours?.size == 2 && colours.all { it != null }) ChatBackground.CustomGradient(colours[0]!!, colours[1]!!) else null
+        }
+        "colour" -> entry.string("colour")?.let { ChatBackgroundColour.fromHex(it) }?.let { ChatBackground.Colour(it) }
+        "pattern" -> {
+            val pattern = entry.string("id")?.let { ChatBackgroundPattern.fromId(it) }
+            val colour = entry.string("colour")?.let { ChatBackgroundColour.fromHex(it) }
+            if (pattern != null && colour != null) ChatBackground.Pattern(pattern, colour) else null
+        }
         "image" -> entry.string("url")?.takeIf { it.startsWith("mxc://") }?.let { ChatBackground.Image(it, entry.string("mimetype")) }
         else -> null
     }
@@ -170,6 +186,22 @@ internal object ChatBackgroundContent {
         is ChatBackground.Gradient -> buildJsonObject {
             put("type", "gradient")
             put("id", background.gradient.id)
+        }
+        is ChatBackground.CustomGradient -> buildJsonObject {
+            put("type", "gradient")
+            putJsonArray("colours") {
+                add(background.top.hex)
+                add(background.bottom.hex)
+            }
+        }
+        is ChatBackground.Colour -> buildJsonObject {
+            put("type", "colour")
+            put("colour", background.colour.hex)
+        }
+        is ChatBackground.Pattern -> buildJsonObject {
+            put("type", "pattern")
+            put("id", background.pattern.id)
+            put("colour", background.colour.hex)
         }
         is ChatBackground.Image -> buildJsonObject {
             put("type", "image")

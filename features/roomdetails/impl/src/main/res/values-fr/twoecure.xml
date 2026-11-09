@@ -4,7 +4,16 @@
     <string name="twoecure_chat_background_title">Arrière-plan de la discussion</string>
     <string name="twoecure_chat_background_none">Aucun arrière-plan</string>
     <string name="twoecure_chat_background_photo">Photo</string>
-    <string name="twoecure_chat_background_colours">Couleurs</string>
+    <string name="twoecure_chat_background_colour_section">Couleur</string>
+    <string name="twoecure_chat_background_your_colour">Votre couleur</string>
+    <string name="twoecure_chat_background_change_colour">Changer la couleur</string>
+    <string name="twoecure_chat_background_choose_colour">Choisir une couleur</string>
+    <string name="twoecure_chat_background_gradients">Dégradés</string>
+    <string name="twoecure_chat_background_your_gradient">Votre dégradé</string>
+    <string name="twoecure_chat_background_top_colour">Couleur du haut</string>
+    <string name="twoecure_chat_background_bottom_colour">Couleur du bas</string>
+    <string name="twoecure_chat_background_patterns">Motifs</string>
+    <string name="twoecure_chat_background_pattern_colour">Couleur du motif</string>
     <string name="twoecure_chat_background_footer">Vous seul voyez cet arrière-plan. Il est enregistré dans votre compte, vos autres appareils l’affichent donc aussi. Une photo est stockée sur le serveur 2ecure sans chiffrement de bout en bout.</string>
     <string name="twoecure_chat_background_error">L’arrière-plan n’a pas pu être enregistré.</string>
     <string name="twoecure_chat_background_sky">Ciel</string>
@@ -13,4 +22,11 @@
     <string name="twoecure_chat_background_sand">Sable</string>
     <string name="twoecure_chat_background_rose">Rose</string>
     <string name="twoecure_chat_background_lavender">Lavande</string>
+    <string name="twoecure_chat_background_pattern_regal">Royal</string>
+    <string name="twoecure_chat_background_pattern_dots">Pois</string>
+    <string name="twoecure_chat_background_pattern_stripes">Rayures</string>
+    <string name="twoecure_chat_background_pattern_checks">Carreaux</string>
+    <string name="twoecure_chat_background_pattern_waves">Vagues</string>
+    <string name="twoecure_chat_background_pattern_zigzag">Zigzag</string>
+    <string name="twoecure_chat_background_pattern_stars">Étoiles</string>
 </resources>

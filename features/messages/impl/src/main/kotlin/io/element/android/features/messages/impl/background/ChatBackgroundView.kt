@@ -13,7 +13,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -24,7 +27,10 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.features.messages.api.background.ChatBackground
+import io.element.android.features.messages.api.background.ChatBackgroundPattern
+import io.element.android.features.messages.api.background.ChatBackgroundColour
 import io.element.android.features.messages.api.background.ChatBackgroundGradient
+import io.element.android.features.messages.api.background.PatternBackground
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.matrix.api.media.MediaSource
@@ -46,6 +52,17 @@ internal fun ChatBackgroundView(
         is ChatBackground.Gradient -> Box(
             modifier = modifier.background(Brush.verticalGradient(background.gradient.colours(isDark)))
         )
+        is ChatBackground.CustomGradient -> Box(
+            modifier = modifier.background(Brush.verticalGradient(listOf(background.top.toColor(), background.bottom.toColor())))
+        )
+        is ChatBackground.Colour -> Box(
+            modifier = modifier.background(background.colour.toColor())
+        )
+        is ChatBackground.Pattern -> PatternBackground(
+            pattern = background.pattern,
+            colour = background.colour,
+            modifier = modifier,
+        )
         is ChatBackground.Image -> Box(modifier = modifier.clipToBounds()) {
             // The photo keeps the screen's height and its top edge, so it doesn't jump when the keyboard opens.
             AsyncImage(
@@ -57,7 +74,7 @@ internal fun ChatBackgroundView(
                     .wrapContentHeight(align = Alignment.Top, unbounded = true)
                     .height(LocalConfiguration.current.screenHeightDp.dp),
             )
-            // A veil in the canvas colour keeps what is drawn straight on the background (dates, «X joined») readable.
+            // A veil in the canvas colour calms busy photos behind the messages.
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -75,3 +92,29 @@ internal fun ChatBackgroundViewPreview() = ElementPreview {
         modifier = Modifier.fillMaxSize(),
     )
 }
+
+@PreviewsDayNight
+@Composable
+internal fun ChatBackgroundViewPatternPreview() = ElementPreview {
+    ChatBackgroundView(
+        background = ChatBackground.Pattern(ChatBackgroundPattern.Regal, ChatBackgroundColour.DefaultPattern),
+        modifier = Modifier.fillMaxSize(),
+    )
+}
+
+/**
+ * 2ecure: whether the timeline is drawn over a [ChatBackgroundView]; dates and state events then get a label.
+ */
+val LocalHasChatBackground = staticCompositionLocalOf { false }
+
+/**
+ * 2ecure: a label in the canvas colour behind text the timeline draws straight on a chat background.
+ */
+@Composable
+fun Modifier.chatBackgroundLabel(): Modifier =
+    if (LocalHasChatBackground.current) {
+        background(ElementTheme.colors.bgCanvasDefault.copy(alpha = 0.9f), CircleShape)
+            .padding(horizontal = 10.dp, vertical = 3.dp)
+    } else {
+        this
+    }

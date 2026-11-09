@@ -9,8 +9,10 @@ package io.element.android.features.messages.api.background
 
 import android.net.Uri
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import io.element.android.libraries.matrix.api.core.RoomId
 import kotlinx.coroutines.flow.Flow
+import kotlin.math.roundToInt
 
 /**
  * 2ecure: a background behind one chat's timeline that only the account's owner sees. An account's choices live in the
@@ -21,7 +23,59 @@ import kotlinx.coroutines.flow.Flow
  */
 sealed interface ChatBackground {
     data class Gradient(val gradient: ChatBackgroundGradient) : ChatBackground
+    data class CustomGradient(val top: ChatBackgroundColour, val bottom: ChatBackgroundColour) : ChatBackground
+    data class Colour(val colour: ChatBackgroundColour) : ChatBackground
+    data class Pattern(val pattern: ChatBackgroundPattern, val colour: ChatBackgroundColour) : ChatBackground
     data class Image(val url: String, val mimeType: String?) : ChatBackground
+}
+
+/**
+ * 2ecure: a colour chosen for a chat background, stored as `#RRGGBB`.
+ */
+@JvmInline
+value class ChatBackgroundColour(val rgb: Int) {
+    val hex: String get() = "#%06X".format(rgb and 0xFFFFFF)
+
+    fun toColor(): Color = Color(0xFF shl 24 or (rgb and 0xFFFFFF))
+
+    /** The colour patterns draw in: the base a little darker, or lighter when the base is dark. */
+    val motif: ChatBackgroundColour
+        get() {
+            val red = (rgb shr 16 and 0xFF) / 255.0
+            val green = (rgb shr 8 and 0xFF) / 255.0
+            val blue = (rgb and 0xFF) / 255.0
+            val luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue
+            fun channel(value: Double): Int = ((if (luminance > 0.5) value * 0.84 else value + 0.2 * (1 - value)) * 255).roundToInt()
+            return ChatBackgroundColour(channel(red) shl 16 or (channel(green) shl 8) or channel(blue))
+        }
+
+    companion object {
+        val Default = ChatBackgroundColour(0x5B8DEF)
+        val DefaultGradientBottom = ChatBackgroundColour(0xB57BEE)
+        val DefaultPattern = ChatBackgroundColour(0xDCE6F2)
+
+        fun fromHex(hex: String): ChatBackgroundColour? =
+            if (hex.length == 7 && hex.startsWith("#")) hex.substring(1).toIntOrNull(16)?.let { ChatBackgroundColour(it) } else null
+
+        fun fromColor(color: Color): ChatBackgroundColour = ChatBackgroundColour(color.toArgb() and 0xFFFFFF)
+    }
+}
+
+/**
+ * 2ecure: patterns drawn in code over a base colour ([PatternBackground]).
+ */
+enum class ChatBackgroundPattern(val id: String) {
+    Regal("regal"),
+    Dots("dots"),
+    Stripes("stripes"),
+    Checks("checks"),
+    Waves("waves"),
+    Zigzag("zigzag"),
+    Stars("stars");
+
+    companion object {
+        fun fromId(id: String): ChatBackgroundPattern? = entries.firstOrNull { it.id == id }
+    }
 }
 
 /**

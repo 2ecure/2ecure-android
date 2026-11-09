@@ -9,7 +9,9 @@ package io.element.android.features.messages.impl.background
 
 import com.google.common.truth.Truth.assertThat
 import io.element.android.features.messages.api.background.ChatBackground
+import io.element.android.features.messages.api.background.ChatBackgroundColour
 import io.element.android.features.messages.api.background.ChatBackgroundGradient
+import io.element.android.features.messages.api.background.ChatBackgroundPattern
 import io.element.android.libraries.matrix.test.AN_EXCEPTION
 import io.element.android.libraries.matrix.test.A_ROOM_ID
 import io.element.android.libraries.matrix.test.A_ROOM_ID_2
@@ -47,6 +49,41 @@ class DefaultChatBackgroundStoreTest {
         )
         assertThat(ChatBackgroundContent.parse("not json")).isNull()
         assertThat(ChatBackgroundContent.backgrounds(JsonObject(emptyMap()))).isEmpty()
+    }
+
+    @Test
+    fun `colours, own gradients and patterns are read and written`() {
+        val content = ChatBackgroundContent.parse(
+            """
+            {"rooms": {
+                "!colour:domain": {"type": "colour", "colour": "#3A6EA5"},
+                "!gradient:domain": {"type": "gradient", "colours": ["#5B8DEF", "#B57BEE"]},
+                "!pattern:domain": {"type": "pattern", "id": "regal", "colour": "#DCE6F2"},
+                "!badColour:domain": {"type": "colour", "colour": "blue"},
+                "!oneColour:domain": {"type": "gradient", "colours": ["#5B8DEF"]},
+                "!unknownPattern:domain": {"type": "pattern", "id": "paisley", "colour": "#DCE6F2"}
+            }}
+            """.trimIndent()
+        )!!
+        val colour = ChatBackground.Colour(ChatBackgroundColour(0x3A6EA5))
+        val gradient = ChatBackground.CustomGradient(ChatBackgroundColour(0x5B8DEF), ChatBackgroundColour(0xB57BEE))
+        val pattern = ChatBackground.Pattern(ChatBackgroundPattern.Regal, ChatBackgroundColour(0xDCE6F2))
+        assertThat(ChatBackgroundContent.backgrounds(content)).containsExactly(
+            "!colour:domain", colour,
+            "!gradient:domain", gradient,
+            "!pattern:domain", pattern,
+        )
+        assertThat(ChatBackgroundContent.entryOf(colour).toString()).isEqualTo("""{"type":"colour","colour":"#3A6EA5"}""")
+        assertThat(ChatBackgroundContent.entryOf(gradient).toString()).isEqualTo("""{"type":"gradient","colours":["#5B8DEF","#B57BEE"]}""")
+        assertThat(ChatBackgroundContent.entryOf(pattern).toString()).isEqualTo("""{"type":"pattern","id":"regal","colour":"#DCE6F2"}""")
+    }
+
+    @Test
+    fun `patterns draw a little darker on light colours and lighter on dark ones`() {
+        assertThat(ChatBackgroundColour(0xDCE6F2).motif.hex).isEqualTo("#B9C1CB")
+        assertThat(ChatBackgroundColour(0x203040).motif.hex).isEqualTo("#4D5966")
+        assertThat(ChatBackgroundColour.fromHex("#5b8def")).isEqualTo(ChatBackgroundColour(0x5B8DEF))
+        assertThat(ChatBackgroundColour.fromHex("5B8DEF")).isNull()
     }
 
     @Test

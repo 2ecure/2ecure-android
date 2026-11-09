@@ -4,7 +4,16 @@
     <string name="twoecure_chat_background_title">Chat background</string>
     <string name="twoecure_chat_background_none">No background</string>
     <string name="twoecure_chat_background_photo">Photo</string>
-    <string name="twoecure_chat_background_colours">Colours</string>
+    <string name="twoecure_chat_background_colour_section">Colour</string>
+    <string name="twoecure_chat_background_your_colour">Your colour</string>
+    <string name="twoecure_chat_background_change_colour">Change colour</string>
+    <string name="twoecure_chat_background_choose_colour">Choose a colour</string>
+    <string name="twoecure_chat_background_gradients">Gradients</string>
+    <string name="twoecure_chat_background_your_gradient">Your gradient</string>
+    <string name="twoecure_chat_background_top_colour">Top colour</string>
+    <string name="twoecure_chat_background_bottom_colour">Bottom colour</string>
+    <string name="twoecure_chat_background_patterns">Patterns</string>
+    <string name="twoecure_chat_background_pattern_colour">Pattern colour</string>
     <string name="twoecure_chat_background_footer">Only you see this background. It is saved in your account, so your other devices show it too. A photo is stored on the 2ecure server without end-to-end encryption.</string>
     <string name="twoecure_chat_background_error">The background could not be saved.</string>
     <string name="twoecure_chat_background_sky">Sky</string>
@@ -13,4 +22,11 @@
     <string name="twoecure_chat_background_sand">Sand</string>
     <string name="twoecure_chat_background_rose">Rose</string>
     <string name="twoecure_chat_background_lavender">Lavender</string>
+    <string name="twoecure_chat_background_pattern_regal">Regal</string>
+    <string name="twoecure_chat_background_pattern_dots">Dots</string>
+    <string name="twoecure_chat_background_pattern_stripes">Stripes</string>
+    <string name="twoecure_chat_background_pattern_checks">Checks</string>
+    <string name="twoecure_chat_background_pattern_waves">Waves</string>
+    <string name="twoecure_chat_background_pattern_zigzag">Zigzag</string>
+    <string name="twoecure_chat_background_pattern_stars">Stars</string>
 </resources>

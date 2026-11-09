@@ -11,6 +11,7 @@ package io.element.android.features.messages.impl.timeline.components.event
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import io.element.android.features.messages.impl.background.chatBackgroundLabel
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemStateContent
 import io.element.android.features.messages.impl.timeline.model.event.aTimelineItemStateEventContent
@@ -24,7 +25,7 @@ fun TimelineItemStateView(
     modifier: Modifier = Modifier
 ) {
     Text(
-        modifier = modifier,
+        modifier = modifier.chatBackgroundLabel(), // 2ecure
         color = ElementTheme.colors.textSecondary,
         style = ElementTheme.typography.fontBodyMdRegular,
         text = content.body,
