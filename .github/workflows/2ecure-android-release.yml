@@ -89,10 +89,10 @@ jobs:
       # The 2ecure patches with their own tests: sign-in (0019, provisioning links; 0023, invitation QR codes; 0025, QR
       # codes of other servers refused), enterprise service (0005, 0018), location off (0009), web client, invitation and
       # account page links (0021, 0023, 0024), the «Delete account» row of the account settings (0010, 0015), the
-      # chat list previews («You:» in one-to-one chats, 0026) and chat backgrounds (0027: the store, and all of the chat
-      # settings module, whose screen gained the row).
-      - name: Unit tests (sign-in, enterprise service, location, links, delete account, chat list, chat backgrounds)
-        run: ./gradlew :features:login:impl:testDebugUnitTest :features:enterprise:impl-foss:testDebugUnitTest :features:location:impl:testDebugUnitTest :libraries:matrix:api:testDebugUnitTest :libraries:eventformatter:impl:testDebugUnitTest :features:preferences:impl:testDebugUnitTest --tests '*.PreferencesAccountViewTest' :features:messages:impl:testDebugUnitTest --tests '*.DefaultChatBackgroundStoreTest' :features:roomdetails:impl:testDebugUnitTest $GRADLE_ARGS
+      # chat list previews («You:» in one-to-one chats, 0026; media without a caption, 0028), chat backgrounds (0027: the
+      # store, and all of the chat settings module, whose screen gained the row) and notification texts (0028).
+      - name: Unit tests (sign-in, enterprise service, location, links, delete account, chat list, chat backgrounds, notifications)
+        run: ./gradlew :features:login:impl:testDebugUnitTest :features:enterprise:impl-foss:testDebugUnitTest :features:location:impl:testDebugUnitTest :libraries:matrix:api:testDebugUnitTest :libraries:eventformatter:impl:testDebugUnitTest :features:preferences:impl:testDebugUnitTest --tests '*.PreferencesAccountViewTest' :features:messages:impl:testDebugUnitTest --tests '*.DefaultChatBackgroundStoreTest' :features:roomdetails:impl:testDebugUnitTest :libraries:push:impl:testDebugUnitTest --tests '*.DefaultNotifiableEventResolverTest' $GRADLE_ARGS
 
       - name: Build APKs
         env:
