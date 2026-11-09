@@ -305,15 +305,16 @@ fun RoomDetailsView(
                         state.eventSink(RoomDetailsEvent.SetFavorite(it))
                     }
                 )
-                // 2ecure: a background that only this account sees, on all its devices.
-                ChatBackgroundItem(
-                    onClick = onChatBackgroundClick
-                )
                 if (state.canShowSecurityAndPrivacy && state.roomType is RoomDetailsType.Room) {
                     SecurityAndPrivacyItem(
                         onClick = onSecurityAndPrivacyClick
                     )
                 }
+                // 2ecure: a background that only this account sees, on all its devices. Last in the section, so the
+                // rows above stay where upstream's tests (h1024dp) expect them.
+                ChatBackgroundItem(
+                    onClick = onChatBackgroundClick
+                )
             }
             if (state.isEncrypted) {
                 PreferenceCategory(
