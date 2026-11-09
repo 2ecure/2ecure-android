@@ -140,6 +140,7 @@ class EditDefaultNotificationSettingPresenter(
                     }.toImmutableList(),
                     avatarData = roomSummary.info.getAvatarData(AvatarSize.CustomRoomNotificationSetting),
                     notificationMode = roomSummary.info.userDefinedNotificationMode,
+                    isDm = roomSummary.isDm,
                 )
             }
             // locale sensitive sorting

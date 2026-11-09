@@ -67,6 +67,7 @@ internal fun MessagesViewTopBar(
     isTombstoned: Boolean,
     heroes: ImmutableList<AvatarData>,
     dmUserIdentityState: IdentityState?,
+    isDm: Boolean = false,
     sharedHistoryIcon: SharedHistoryIcon,
     dmUserStatus: DisplayedStatus?,
     onRoomDetailsClick: () -> Unit,
@@ -96,6 +97,7 @@ internal fun MessagesViewTopBar(
                     roomAvatar = roomAvatar,
                     isTombstoned = isTombstoned,
                     heroes = heroes,
+                    isDm = isDm,
                     dmUserStatus = dmUserStatus,
                     modifier = titleModifier
                 )
@@ -150,6 +152,7 @@ private fun RoomAvatarAndNameRow(
     roomAvatar: AvatarData,
     heroes: ImmutableList<AvatarData>,
     isTombstoned: Boolean,
+    isDm: Boolean,
     dmUserStatus: DisplayedStatus?,
     modifier: Modifier = Modifier
 ) {
@@ -162,6 +165,7 @@ private fun RoomAvatarAndNameRow(
             avatarType = AvatarType.Room(
                 heroes = heroes,
                 isTombstoned = isTombstoned,
+                isDm = isDm,
             ),
         )
         DisplayNameWithStatus(

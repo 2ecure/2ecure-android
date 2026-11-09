@@ -103,6 +103,7 @@ fun EditDefaultNotificationSettingView(
                                 avatarData = summary.avatarData,
                                 avatarType = AvatarType.Room(
                                     heroes = summary.heroesAvatar,
+                                    isDm = summary.isDm,
                                 ),
                             )
                         },

@@ -19,6 +19,8 @@ sealed interface AvatarType {
     data class Room(
         val isTombstoned: Boolean = false,
         val heroes: ImmutableList<AvatarData> = persistentListOf(),
+        // 2ecure: a one-to-one chat keeps the round avatar; every other room gets a rounded square.
+        val isDm: Boolean = false,
     ) : AvatarType
 
     data class Space(

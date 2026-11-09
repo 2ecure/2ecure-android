@@ -472,6 +472,7 @@ private fun LazyListScope.searchHistory(
                         avatarType = AvatarType.Room(
                             heroes = heroAvatars,
                             isTombstoned = result.roomInfo.successorRoom != null,
+                            isDm = result.roomInfo.isDm,
                         ),
                     )
 
@@ -586,6 +587,7 @@ private fun LazyListScope.roomListResults(
                 avatarType = AvatarType.Room(
                     heroes = result.heroes.map { it.copy(size = AvatarSize.SearchRoomListItem) }.toImmutableList(),
                     isTombstoned = result.isTombstoned,
+                    isDm = result.isDm,
                 ),
             )
 
@@ -656,7 +658,8 @@ private fun LazyListScope.messageSearchResults(
                 avatarData = result.roomInfo.getAvatarData(AvatarSize.RoomListItem),
                 avatarType = AvatarType.Room(
                     heroes = result.roomInfo.heroes.map { it.getAvatarData(AvatarSize.RoomListItem) }.toImmutableList(),
-                    isTombstoned = result.roomInfo.successorRoom != null
+                    isTombstoned = result.roomInfo.successorRoom != null,
+                    isDm = result.roomInfo.isDm,
                 ),
                 roomName = result.roomInfo.name ?: result.roomInfo.id.value,
                 body = result.body,
@@ -668,7 +671,8 @@ private fun LazyListScope.messageSearchResults(
                     avatarData = result.roomInfo.getAvatarData(AvatarSize.RoomListItem),
                     avatarType = AvatarType.Room(
                         heroes = result.roomInfo.heroes.map { it.getAvatarData(AvatarSize.RoomListItem) }.toImmutableList(),
-                        isTombstoned = result.roomInfo.successorRoom != null
+                        isTombstoned = result.roomInfo.successorRoom != null,
+                        isDm = result.roomInfo.isDm,
                     ),
                     roomName = result.roomInfo.name ?: result.roomInfo.id.value,
                     content = result.mediaContent,

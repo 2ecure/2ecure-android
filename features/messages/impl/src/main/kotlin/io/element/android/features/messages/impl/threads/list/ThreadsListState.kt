@@ -19,4 +19,6 @@ data class ThreadsListState(
     val heroes: ImmutableList<AvatarData>,
     val threads: ImmutableList<ThreadListRowItem>,
     val eventSink: (ThreadsListEvent) -> Unit,
+    // 2ecure: one-to-one chats keep the round avatar, rooms get a rounded square.
+    val isDm: Boolean = false,
 )

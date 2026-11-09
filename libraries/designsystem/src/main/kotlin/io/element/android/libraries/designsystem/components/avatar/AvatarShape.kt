@@ -17,8 +17,12 @@ import androidx.compose.ui.unit.Dp
 @Composable
 fun AvatarType.User.avatarShape() = CircleShape
 
+/**
+ * 2ecure: one-to-one chats keep the circle, every other room gets the rounded square spaces have, so rooms and
+ * direct chats tell apart at a glance.
+ */
 @Composable
-fun AvatarType.Room.avatarShape() = CircleShape
+fun AvatarType.Room.avatarShape(avatarSize: Dp): Shape = if (isDm) CircleShape else RoundedCornerShape(avatarSize * 0.25f)
 
 @Composable
 fun AvatarType.Space.avatarShape(avatarSize: Dp) = RoundedCornerShape(avatarSize * 0.25f)
@@ -27,7 +31,7 @@ fun AvatarType.Space.avatarShape(avatarSize: Dp) = RoundedCornerShape(avatarSize
 fun AvatarType.avatarShape(avatarSize: Dp): Shape {
     return when (this) {
         is AvatarType.Space -> avatarShape(avatarSize)
-        is AvatarType.Room -> avatarShape()
+        is AvatarType.Room -> avatarShape(avatarSize)
         is AvatarType.User -> avatarShape()
     }
 }

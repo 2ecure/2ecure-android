@@ -50,6 +50,7 @@ internal fun ThreadTopBar(
     isTombstoned: Boolean,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isDm: Boolean = false,
 ) {
     TopAppBar(
         modifier = modifier,
@@ -74,6 +75,7 @@ internal fun ThreadTopBar(
                     avatarType = AvatarType.Room(
                         heroes = heroes,
                         isTombstoned = isTombstoned,
+                        isDm = isDm,
                     ),
                 )
                 Column(

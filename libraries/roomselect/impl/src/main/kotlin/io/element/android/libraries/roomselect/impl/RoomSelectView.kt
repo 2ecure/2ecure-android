@@ -382,6 +382,7 @@ private fun RoomSummaryView(
                         user.getAvatarData(size = AvatarSize.RoomSelectRoomListItem)
                     }.toImmutableList(),
                     isTombstoned = roomInfo.isTombstoned,
+                    isDm = roomInfo.isDm,
                 ),
             )
         },

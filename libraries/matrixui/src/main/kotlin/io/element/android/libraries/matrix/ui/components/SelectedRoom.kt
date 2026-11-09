@@ -35,6 +35,7 @@ fun SelectedRoom(
         avatarType = AvatarType.Room(
             heroes = roomInfo.heroes.map { it.getAvatarData(AvatarSize.SelectedRoom) }.toImmutableList(),
             isTombstoned = roomInfo.isTombstoned,
+            isDm = roomInfo.isDm,
         ),
         // If name is null, we do not have space to render "No room name", so just use `#` here.
         text = roomInfo.name ?: "#",

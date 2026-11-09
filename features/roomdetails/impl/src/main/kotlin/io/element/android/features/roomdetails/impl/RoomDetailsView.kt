@@ -544,6 +544,7 @@ private fun DmHeaderSection(
                     otherMember.getAvatarData(size = AvatarSize.RoomDetailsHeader)
                 ),
                 isTombstoned = isTombstoned,
+                isDm = true,
             ),
             contentDescription = stringResource(CommonStrings.a11y_room_avatar),
             modifier = Modifier

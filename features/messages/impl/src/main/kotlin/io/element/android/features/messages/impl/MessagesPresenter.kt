@@ -333,6 +333,7 @@ class MessagesPresenter(
             roomName = roomInfo.name,
             roomAvatar = roomAvatar,
             heroes = heroes,
+            isDm = roomInfo.isDm,
             userEventPermissions = userEventPermissions,
             composerState = composerState,
             voiceMessageComposerState = voiceMessageComposerState,

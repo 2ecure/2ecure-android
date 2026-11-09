@@ -25,12 +25,13 @@ internal fun RoomAvatar(
     forcedAvatarSize: Dp? = null,
     contentDescription: String? = null,
 ) {
+    val avatarShape = avatarType.avatarShape(forcedAvatarSize ?: avatarData.size.dp)
     when {
         avatarType.isTombstoned -> {
             TombstonedRoomAvatar(
                 size = forcedAvatarSize ?: avatarData.size.dp,
                 modifier = modifier,
-                avatarShape = avatarType.avatarShape(),
+                avatarShape = avatarShape,
                 contentDescription = contentDescription
             )
         }
@@ -38,8 +39,19 @@ internal fun RoomAvatar(
             InitialOrImageAvatar(
                 avatarData = avatarData,
                 hideAvatarImage = hideAvatarImage,
-                avatarShape = avatarType.avatarShape(),
+                avatarShape = avatarShape,
                 forcedAvatarSize = forcedAvatarSize,
+                modifier = modifier,
+                contentDescription = contentDescription,
+            )
+        }
+        // 2ecure: a room without a picture of its own shows its first member's, in the room's shape.
+        !avatarType.isDm -> {
+            InitialOrImageAvatar(
+                avatarData = avatarType.heroes.first(),
+                hideAvatarImage = hideAvatarImage,
+                avatarShape = avatarShape,
+                forcedAvatarSize = forcedAvatarSize ?: avatarData.size.dp,
                 modifier = modifier,
                 contentDescription = contentDescription,
             )

@@ -123,6 +123,7 @@ class ThreadsListPresenter(
             isRoomTombstoned = roomInfo.successorRoom != null,
             heroes = heroes,
             eventSink = ::handleEvent,
+            isDm = roomInfo.isDm,
         )
     }
 }

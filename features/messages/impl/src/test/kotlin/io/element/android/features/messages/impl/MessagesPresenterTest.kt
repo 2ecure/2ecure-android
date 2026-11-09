@@ -1259,6 +1259,23 @@ class MessagesPresenterTest {
     }
 
     @Test
+    fun `present - 2ecure - the state says whether the room is a one-to-one chat, for the avatar's shape`() = runTest {
+        for (isDm in listOf(true, false)) {
+            val room = FakeJoinedRoom(
+                baseRoom = FakeBaseRoom(
+                    roomPermissions = roomPermissions(),
+                    initialRoomInfo = aRoomInfo(isDm = isDm)
+                ),
+                typingNoticeResult = { Result.success(Unit) },
+            )
+            createMessagesPresenter(joinedRoom = room).testWithLifecycleOwner {
+                skipItems(1)
+                assertThat(awaitItem().isDm).isEqualTo(isDm)
+            }
+        }
+    }
+
+    @Test
     fun `present - room without successor room has null successor info in state`() = runTest {
         val room = FakeJoinedRoom(
             baseRoom = FakeBaseRoom(

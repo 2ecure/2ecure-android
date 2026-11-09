@@ -18,7 +18,7 @@ class FakeNotificationBitmapLoader(
     var getRoomBitmapResult: (AvatarData, ImageLoader, Long) -> Bitmap? = { _, _, _ -> null },
     var getUserIconResult: (AvatarData, ImageLoader) -> IconCompat? = { _, _ -> null },
 ) : NotificationBitmapLoader {
-    override suspend fun getRoomBitmap(avatarData: AvatarData, imageLoader: ImageLoader, targetSize: Long): Bitmap? {
+    override suspend fun getRoomBitmap(avatarData: AvatarData, imageLoader: ImageLoader, targetSize: Long, isDm: Boolean): Bitmap? {
         return getRoomBitmapResult(avatarData, imageLoader, targetSize)
     }
 

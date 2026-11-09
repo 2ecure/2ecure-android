@@ -23,11 +23,13 @@ interface NotificationBitmapLoader {
      * @param avatarData the data related to the Avatar
      * @param imageLoader Coil image loader
      * @param targetSize The size we want the bitmap to be resized to
+     * @param isDm 2ecure: a one-to-one chat's icon is round, a room's a rounded square (as in the app)
      */
     suspend fun getRoomBitmap(
         avatarData: AvatarData,
         imageLoader: ImageLoader,
         targetSize: Long = AVATAR_THUMBNAIL_SIZE_IN_PIXEL,
+        isDm: Boolean = true,
     ): Bitmap?
 
     /**

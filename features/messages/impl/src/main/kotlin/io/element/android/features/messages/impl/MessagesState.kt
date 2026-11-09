@@ -37,6 +37,8 @@ data class MessagesState(
     val roomName: String?,
     val roomAvatar: AvatarData,
     val heroes: ImmutableList<AvatarData>,
+    // 2ecure: one-to-one chats keep the round avatar in the top bar, rooms get a rounded square.
+    val isDm: Boolean = false,
     val userEventPermissions: UserEventPermissions,
     val composerState: MessageComposerState,
     val voiceMessageComposerState: VoiceMessageComposerState,

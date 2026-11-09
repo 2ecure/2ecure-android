@@ -61,7 +61,7 @@ class DefaultRoomGroupMessageCreator(
             stringProvider.getString(R.string.notification_ticker_text_dm, events.last().senderDisambiguatedDisplayName, events.last().description)
         }
 
-        val largeBitmap = getRoomBitmap(events, imageLoader)
+        val largeBitmap = getRoomBitmap(events, imageLoader, isDm = !roomIsGroup)
 
         val lastMessageTimestamp = events.last().timestamp
         val smartReplyErrors = events.filter { it.isSmartReplyError() }
@@ -93,6 +93,7 @@ class DefaultRoomGroupMessageCreator(
     private suspend fun getRoomBitmap(
         events: List<NotifiableMessageEvent>,
         imageLoader: ImageLoader,
+        isDm: Boolean,
     ): Bitmap? {
         // Use the last event (most recent?)
         val event = events.reversed().firstOrNull { it.roomAvatarPath != null }
@@ -106,6 +107,7 @@ class DefaultRoomGroupMessageCreator(
                     size = AvatarSize.RoomDetailsHeader,
                 ),
                 imageLoader = imageLoader,
+                isDm = isDm,
             )
         }
     }

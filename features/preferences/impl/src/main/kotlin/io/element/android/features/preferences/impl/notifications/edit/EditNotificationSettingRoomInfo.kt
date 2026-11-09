@@ -18,5 +18,7 @@ data class EditNotificationSettingRoomInfo(
     val name: String?,
     val heroesAvatar: ImmutableList<AvatarData>,
     val avatarData: AvatarData,
-    val notificationMode: RoomNotificationMode?
+    val notificationMode: RoomNotificationMode?,
+    // 2ecure: one-to-one chats keep the round avatar, rooms get a rounded square.
+    val isDm: Boolean = false,
 )

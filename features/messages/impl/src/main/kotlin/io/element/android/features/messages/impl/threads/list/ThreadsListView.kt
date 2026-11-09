@@ -107,6 +107,7 @@ fun ThreadsListView(
                             avatarType = AvatarType.Room(
                                 heroes = state.heroes,
                                 isTombstoned = state.isRoomTombstoned,
+                                isDm = state.isDm,
                             ),
                             contentDescription = null,
                         )

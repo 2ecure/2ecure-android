@@ -279,6 +279,7 @@ fun MessagesView(
                                 roomAvatarData = state.roomAvatar,
                                 heroes = state.heroes,
                                 isTombstoned = state.isTombstoned,
+                                isDm = state.isDm,
                                 onBackClick = onBackClick,
                             )
                         }
@@ -288,6 +289,7 @@ fun MessagesView(
                                 roomAvatar = state.roomAvatar,
                                 isTombstoned = state.isTombstoned,
                                 heroes = state.heroes,
+                                isDm = state.isDm,
                                 dmUserIdentityState = state.dmUserVerificationState,
                                 sharedHistoryIcon = state.topBarSharedHistoryIcon,
                                 dmUserStatus = state.dmUserStatus,

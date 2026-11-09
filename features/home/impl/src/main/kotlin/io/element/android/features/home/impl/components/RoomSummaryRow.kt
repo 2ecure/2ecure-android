@@ -207,6 +207,7 @@ private fun RoomSummaryScaffoldRow(
                 AvatarType.Room(
                     heroes = room.heroes,
                     isTombstoned = room.isTombstoned,
+                    isDm = room.isDm,
                 )
             },
             hideImage = hideAvatarImage,
