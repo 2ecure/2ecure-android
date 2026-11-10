@@ -12,6 +12,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import io.element.android.libraries.core.meta.BuildMeta
 import io.element.android.libraries.featureflag.api.Feature
+import io.element.android.libraries.featureflag.api.FeatureFlags
 import io.element.android.libraries.featureflag.api.FeaturesProvider
 import io.element.android.libraries.featureflag.test.FakeFeature
 import io.element.android.libraries.matrix.test.core.aBuildMeta
@@ -97,6 +98,25 @@ class DefaultFeatureFlagServiceTest {
         featureFlagService.isFeatureEnabledFlow(aFeature).test {
             assertThat(awaitItem()).isTrue()
         }
+    }
+
+    @Test
+    fun `2ecure - native calls stay off even when a runtime provider turns them on`() = runTest {
+        val buildMeta = aBuildMeta()
+        val featureFlagProvider = FakeMutableFeatureFlagProvider(0, buildMeta)
+        val featureFlagService = createDefaultFeatureFlagService(
+            providers = setOf(featureFlagProvider),
+            buildMeta = buildMeta,
+            features = FeatureFlags.entries,
+        )
+        featureFlagProvider.setFeatureEnabled(FeatureFlags.NativeCall, true)
+        featureFlagService.isFeatureEnabledFlow(FeatureFlags.NativeCall).test {
+            assertThat(awaitItem()).isFalse()
+            cancelAndIgnoreRemainingEvents()
+        }
+        assertThat(
+            featureFlagService.getAvailableFeatures(includeFinishedFeatures = false, isInLabs = false)
+        ).doesNotContain(FeatureFlags.NativeCall)
     }
 
     @Test

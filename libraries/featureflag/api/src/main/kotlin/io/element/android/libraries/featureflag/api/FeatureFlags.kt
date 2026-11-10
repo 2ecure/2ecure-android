@@ -175,7 +175,9 @@ enum class FeatureFlags(
         title = "Native calls (experimental)",
         description = "Place calls with the native MatrixRTC stack instead of the Element Call WebView.",
         defaultValue = { false },
-        isFinished = false,
+        // 2ecure: off for good. Finished flags always return their default value, so no developer setting can turn
+        // native calls on: their foreground service (camera and microphone) is removed from the app manifest.
+        isFinished = true,
     ),
     ReceiveNotificationsFromOtherSignedInAccounts(
         key = "feature.receive_notifications_from_other_signed_in_accounts",

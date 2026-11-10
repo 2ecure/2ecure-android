@@ -13,6 +13,10 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" tools:node="remove" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" tools:node="remove" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" tools:node="remove" />
+    <!-- Native calls are off for good (FeatureFlags.NativeCall): their foreground service would keep the camera
+         running in the background, which Google Play asks to declare. Calls keep the Element Call screen and its
+         microphone foreground service. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" tools:node="remove" />
 
     <application
         android:name=".ElementXApplication"
@@ -33,6 +37,10 @@
 
         <service
             android:name="io.element.android.features.location.impl.live.service.LiveLocationSharingService"
+            tools:node="remove" />
+
+        <service
+            android:name="io.element.android.call.impl.services.ElementCallForegroundService"
             tools:node="remove" />
 
         <meta-data
