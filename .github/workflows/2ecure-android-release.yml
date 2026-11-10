@@ -90,9 +90,10 @@ jobs:
       # codes of other servers refused), enterprise service (0005, 0018), location off (0009), web client, invitation and
       # account page links (0021, 0023, 0024), the «Delete account» row of the account settings (0010, 0015), the
       # chat list previews («You:» in one-to-one chats, 0026; media without a caption, 0028), chat backgrounds (0027: the
-      # store, and all of the chat settings module, whose screen gained the row) and notification texts (0028).
-      - name: Unit tests (sign-in, enterprise service, location, links, delete account, chat list, chat backgrounds, notifications, avatar shapes)
-        run: ./gradlew :features:login:impl:testDebugUnitTest :features:enterprise:impl-foss:testDebugUnitTest :features:location:impl:testDebugUnitTest :libraries:matrix:api:testDebugUnitTest :libraries:eventformatter:impl:testDebugUnitTest :features:preferences:impl:testDebugUnitTest --tests '*.PreferencesAccountViewTest' --tests '*.EditDefaultNotificationSettingsPresenterTest' :features:messages:impl:testDebugUnitTest --tests '*.DefaultChatBackgroundStoreTest' --tests '*.MessagesPresenterTest' :features:roomdetails:impl:testDebugUnitTest :libraries:push:impl:testDebugUnitTest --tests '*.DefaultNotifiableEventResolverTest' --tests '*.DefaultBaseRoomGroupMessageCreatorTest' --tests '*.DefaultNotificationCreatorTest' --tests '*.DefaultNotificationConversationServiceTest' $GRADLE_ARGS
+      # store, and all of the chat settings module, whose screen gained the row), notification texts (0028), avatar
+      # shapes (0029) and native calls off for good (0030, the feature flags).
+      - name: Unit tests (sign-in, enterprise service, location, links, delete account, chat list, chat backgrounds, notifications, avatar shapes, native calls off)
+        run: ./gradlew :libraries:featureflag:impl:testDebugUnitTest :features:login:impl:testDebugUnitTest :features:enterprise:impl-foss:testDebugUnitTest :features:location:impl:testDebugUnitTest :libraries:matrix:api:testDebugUnitTest :libraries:eventformatter:impl:testDebugUnitTest :features:preferences:impl:testDebugUnitTest --tests '*.PreferencesAccountViewTest' --tests '*.EditDefaultNotificationSettingsPresenterTest' :features:messages:impl:testDebugUnitTest --tests '*.DefaultChatBackgroundStoreTest' --tests '*.MessagesPresenterTest' :features:roomdetails:impl:testDebugUnitTest :libraries:push:impl:testDebugUnitTest --tests '*.DefaultNotifiableEventResolverTest' --tests '*.DefaultBaseRoomGroupMessageCreatorTest' --tests '*.DefaultNotificationCreatorTest' --tests '*.DefaultNotificationConversationServiceTest' $GRADLE_ARGS
 
       - name: Build APKs
         env:
@@ -122,12 +123,29 @@ jobs:
           # Patch 0022: the bundle and every APK carry upstream code * 100 + build_number.
           "$BT/aapt2" dump badging "$APK" | grep -q "versionCode='[0-9]*$(printf '%02d' '${{ inputs.build_number }}')'" \
             || { echo "::error::version code does not end in build number ${{ inputs.build_number }}"; exit 1; }
+          # Patch 0030: no foreground service with the camera (Google Play would ask for a declaration with a video);
+          # calls keep the microphone one.
+          PERMISSIONS=$("$BT/aapt2" dump permissions "$APK")
+          grep "FOREGROUND_SERVICE" <<< "$PERMISSIONS" || true
+          if [[ "$PERMISSIONS" == *FOREGROUND_SERVICE_CAMERA* ]]; then
+            echo "::error::the APK asks for FOREGROUND_SERVICE_CAMERA"; exit 1
+          fi
+          if [[ "$PERMISSIONS" != *FOREGROUND_SERVICE_MICROPHONE* ]]; then
+            echo "::error::the APK lost FOREGROUND_SERVICE_MICROPHONE (calls)"; exit 1
+          fi
           "$BT/apksigner" verify "$APK"
           "$BT/apksigner" verify --print-certs "$APK" | grep -i "certificate" || true
           mkdir -p out
           cp "$APK" out/2ecure-${{ github.run_number }}-arm64.apk
           AAB=app/build/outputs/bundle/gplayRelease/app-gplay-release.aab
-          if [ -f "$AAB" ]; then ls -l "$AAB"; cp "$AAB" out/2ecure-${{ github.run_number }}.aab; fi
+          if [ -f "$AAB" ]; then
+            ls -l "$AAB"
+            unzip -p "$AAB" base/manifest/AndroidManifest.xml > "$RUNNER_TEMP/aab-manifest.pb"
+            if grep -a -q "FOREGROUND_SERVICE_CAMERA" "$RUNNER_TEMP/aab-manifest.pb"; then
+              echo "::error::the App Bundle asks for FOREGROUND_SERVICE_CAMERA"; exit 1
+            fi
+            cp "$AAB" out/2ecure-${{ github.run_number }}.aab
+          fi
 
       # Artifacts count against the organisation's 500 MB Actions storage: arm64 APK only, short retention.
       - name: APK (arm64-v8a, for direct installation)
