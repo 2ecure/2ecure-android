@@ -89,6 +89,7 @@ internal fun createRoomListRoomSummary(
     isTombstoned: Boolean = false,
     isSpace: Boolean = false,
     dmUserStatus: DisplayedStatus? = null,
+    isPublic: Boolean = false,
 ) = RoomListRoomSummary(
     id = A_ROOM_ID.value,
     roomId = A_ROOM_ID,
@@ -109,6 +110,7 @@ internal fun createRoomListRoomSummary(
     canonicalAlias = null,
     inviteSender = null,
     isDm = false,
+    isPublic = isPublic,
     heroes = heroes.toImmutableList(),
     isTombstoned = isTombstoned,
     isSpace = isSpace,

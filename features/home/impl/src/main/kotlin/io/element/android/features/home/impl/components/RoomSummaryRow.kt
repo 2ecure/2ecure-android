@@ -132,6 +132,7 @@ internal fun RoomSummaryRow(
                         isHighlighted = room.isHighlighted,
                         dmUserStatus = room.dmUserStatus,
                         showsRoomIcon = !room.isDm,
+                        isPublicRoom = room.isPublic,
                     )
                     MessagePreviewAndIndicatorRow(room = room, showUnreadCount = showUnreadCount, showAllActivity = showAllActivity)
                 }
@@ -228,6 +229,7 @@ private fun NameAndTimestampRow(
     dmUserStatus: DisplayedStatus?,
     modifier: Modifier = Modifier,
     showsRoomIcon: Boolean = false,
+    isPublicRoom: Boolean = false,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -239,12 +241,12 @@ private fun NameAndTimestampRow(
             horizontalArrangement = spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // 2ecure: a group icon tells rooms apart from one-to-one chats.
+            // 2ecure: a group icon tells rooms apart from one-to-one chats, a globe marks public rooms.
             if (showsRoomIcon) {
                 Icon(
                     modifier = Modifier.size(20.dp),
-                    imageVector = CompoundIcons.Group(),
-                    contentDescription = stringResource(CommonStrings.common_room),
+                    imageVector = if (isPublicRoom) CompoundIcons.Public() else CompoundIcons.Group(),
+                    contentDescription = stringResource(if (isPublicRoom) CommonStrings.common_public_room else CommonStrings.common_room),
                     tint = ElementTheme.colors.iconSecondary,
                 )
             }

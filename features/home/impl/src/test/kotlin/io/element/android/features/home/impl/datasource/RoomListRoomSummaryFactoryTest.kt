@@ -37,6 +37,14 @@ class RoomListRoomSummaryFactoryTest {
 
         assertThat(formatter.lastIsDmRoom).isFalse()
     }
+
+    @Test
+    fun `2ecure - a public room is marked for the globe icon, any other room is not`() {
+        val factory = aRoomListRoomSummaryFactory()
+
+        assertThat(factory.create(aRoomSummary(info = aRoomInfo(isPublic = true))).isPublic).isTrue()
+        assertThat(factory.create(aRoomSummary(info = aRoomInfo(isPublic = false))).isPublic).isFalse()
+    }
 }
 
 fun aRoomListRoomSummaryFactory(

@@ -38,6 +38,8 @@ data class RoomListRoomSummary(
     val activeCallIntent: CallIntent?,
     val isDirect: Boolean,
     val isDm: Boolean,
+    // 2ecure: anyone may join (join rule public); the chat list shows a globe instead of the group icon.
+    val isPublic: Boolean,
     val isFavorite: Boolean,
     val inviteSender: InviteSender?,
     val isTombstoned: Boolean,

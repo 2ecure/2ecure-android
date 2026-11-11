@@ -134,6 +134,8 @@ class RoomListPresenterTest {
                     numberOfUnreadMentions = 1,
                     numberOfUnreadMessages = 2,
                     timestamp = "0 TimeOrDate true",
+                    // 2ecure: aRoomSummary() is a public room.
+                    isPublic = true,
                 )
             )
             assertThat(withRoomsState.contentAsRooms().seenRoomInvites).containsExactly(A_ROOM_ID, A_ROOM_ID_2, A_ROOM_ID_3)
