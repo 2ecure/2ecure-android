@@ -48,6 +48,7 @@ import io.element.android.features.home.impl.roomlist.RoomListContextMenu
 import io.element.android.features.home.impl.roomlist.RoomListDeclineInviteMenu
 import io.element.android.features.home.impl.roomlist.RoomListEvent
 import io.element.android.features.home.impl.roomlist.RoomListState
+import io.element.android.features.home.impl.roomlist.privacy.PrivacyChoiceDialog
 import io.element.android.features.home.impl.search.GlobalSearchEvent
 import io.element.android.features.home.impl.search.GlobalSearchView
 import io.element.android.features.home.impl.search.RoomListSearchView
@@ -123,6 +124,9 @@ fun HomeView(
         }
 
         leaveRoomView()
+
+        // 2ecure: «Who can find you?» after signing in (docs/privacy.md).
+        PrivacyChoiceDialog(state.privacyChoiceState)
 
         HomeScaffold(
             state = homeState,

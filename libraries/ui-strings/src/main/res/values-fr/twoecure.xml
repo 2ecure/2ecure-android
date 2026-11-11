@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2ecure: privacy and online status (docs/privacy.md). -->
+<resources>
+    <string name="twoecure_privacy_choice_title">Qui peut vous trouver ?</string>
+    <string name="twoecure_privacy_choice_message">Choisissez qui vous trouve dans la recherche en commençant une nouvelle discussion.</string>
+    <string name="twoecure_privacy_choice_everyone">Tout le monde sur 2ecure</string>
+    <string name="twoecure_privacy_choice_everyone_description">Tout le monde sur 2ecure vous trouve dans la recherche et y voit votre nom et votre photo de profil.</string>
+    <string name="twoecure_privacy_choice_contacts">Seulement les personnes avec qui je discute</string>
+    <string name="twoecure_privacy_choice_contacts_description">Vous n’apparaissez pas dans la recherche. Les personnes qui partagent déjà une discussion avec vous vous trouvent toujours, et elles seules voient votre photo de profil.</string>
+    <string name="twoecure_privacy_choice_footer">Les personnes qui connaissent votre adresse peuvent quand même vous inviter. Vous pouvez modifier ce choix à tout moment dans les paramètres.</string>
+    <string name="twoecure_privacy_choice_continue">Continuer</string>
+    <string name="twoecure_privacy_choice_error">Votre choix n’a pas pu être enregistré. Veuillez réessayer.</string>
+    <string name="twoecure_presence_online">En ligne</string>
+    <string name="twoecure_presence_last_seen">Dernière connexion %1$s</string>
+    <string name="twoecure_presence_share_footer">Cela vaut aussi pour votre statut en ligne : désactivé, personne ne voit si vous êtes en ligne, et vous ne le voyez pas non plus pour les autres.</string>
+</resources>

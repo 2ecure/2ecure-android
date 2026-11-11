@@ -36,6 +36,7 @@ import io.element.android.libraries.designsystem.utils.snackbar.SnackbarHost
 import io.element.android.libraries.designsystem.utils.snackbar.collectSnackbarMessageAsState
 import io.element.android.libraries.designsystem.utils.snackbar.rememberSnackbarHostState
 import io.element.android.libraries.matrix.api.media.MediaPreviewValue
+import io.element.android.libraries.matrix.ui.privacy.PrivacyChoiceOptions
 import io.element.android.libraries.ui.strings.CommonStrings
 
 /**
@@ -63,6 +64,7 @@ fun ModerationAndSafetyView(
             )
         }
     ) {
+        DiscoverableSection(state)
         PresenceSection(state)
         InvitesSection(state)
         MediaSection(state)
@@ -92,6 +94,25 @@ private fun BlockedUsersSection(
     }
 }
 
+/**
+ * 2ecure: who can find the account in the search (docs/privacy.md).
+ */
+@Composable
+private fun DiscoverableSection(state: ModerationAndSafetyState) {
+    PreferenceCategory(
+        title = stringResource(CommonStrings.twoecure_privacy_choice_title),
+    ) {
+        PrivacyChoiceOptions(
+            selection = state.discoverable,
+            onSelect = { state.eventSink(ModerationAndSafetyEvent.SetDiscoverable(it)) },
+            enabled = !state.isSavingDiscoverable,
+        )
+        ListSupportingText(
+            text = stringResource(CommonStrings.twoecure_privacy_choice_message),
+        )
+    }
+}
+
 @Composable
 private fun PresenceSection(state: ModerationAndSafetyState) {
     PreferenceCategory(
@@ -108,6 +129,10 @@ private fun PresenceSection(state: ModerationAndSafetyState) {
                 checked = state.isSharePresenceEnabled,
             ),
             onClick = { state.eventSink(ModerationAndSafetyEvent.SetSharePresenceEnabled(!state.isSharePresenceEnabled)) }
+        )
+        // 2ecure: the switch also covers the online status (docs/privacy.md).
+        ListSupportingText(
+            text = stringResource(CommonStrings.twoecure_presence_share_footer),
         )
     }
 }

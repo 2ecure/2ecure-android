@@ -10,6 +10,7 @@ package io.element.android.features.preferences.impl.moderation
 import io.element.android.libraries.matrix.api.media.MediaPreviewValue
 
 sealed interface ModerationAndSafetyEvent {
+    data class SetDiscoverable(val discoverable: Boolean) : ModerationAndSafetyEvent
     data class SetSharePresenceEnabled(val enabled: Boolean) : ModerationAndSafetyEvent
     data class SetHideInviteAvatars(val value: Boolean) : ModerationAndSafetyEvent
     data class SetTimelineMediaPreviewValue(val value: MediaPreviewValue) : ModerationAndSafetyEvent

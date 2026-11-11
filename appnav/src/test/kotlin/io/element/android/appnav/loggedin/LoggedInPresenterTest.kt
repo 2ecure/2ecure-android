@@ -35,6 +35,7 @@ import io.element.android.libraries.matrix.test.sync.FakeSyncService
 import io.element.android.libraries.matrix.test.verification.FakeSessionVerificationService
 import io.element.android.libraries.permissions.test.FakeLocalNetworkPermissionAdvisor
 import io.element.android.libraries.permissions.test.FakePermissionsPresenterFactory
+import io.element.android.libraries.preferences.test.InMemorySessionPreferencesStore
 import io.element.android.libraries.push.api.PushService
 import io.element.android.libraries.push.api.PusherRegistrationFailure
 import io.element.android.libraries.push.test.FakePushService
@@ -43,6 +44,7 @@ import io.element.android.libraries.pushproviders.api.PushProvider
 import io.element.android.libraries.pushproviders.test.FakePushProvider
 import io.element.android.services.analytics.api.AnalyticsService
 import io.element.android.services.analytics.test.FakeAnalyticsService
+import io.element.android.services.appnavstate.test.FakeAppForegroundStateService
 import io.element.android.tests.testutils.WarmUpRule
 import io.element.android.tests.testutils.consumeItemsUntilPredicate
 import io.element.android.tests.testutils.lambda.assert
@@ -146,6 +148,8 @@ class LoggedInPresenterTest {
             networkMonitor = networkMonitor,
             localNetworkPermissionAdvisor = FakeLocalNetworkPermissionAdvisor(),
             permissionsPresenterFactory = FakePermissionsPresenterFactory(),
+            appForegroundStateService = FakeAppForegroundStateService(initialForegroundValue = false),
+            sessionPreferencesStore = InMemorySessionPreferencesStore(),
         ).test {
             encryptionService.emitRecoveryState(RecoveryState.UNKNOWN)
             encryptionService.emitRecoveryState(RecoveryState.INCOMPLETE)
@@ -376,6 +380,8 @@ class LoggedInPresenterTest {
             accountManagementUrlResult = { Result.success(null) },
         ),
         networkMonitor: FakeNetworkMonitor = FakeNetworkMonitor(),
+        appForegroundStateService: FakeAppForegroundStateService = FakeAppForegroundStateService(initialForegroundValue = false),
+        sessionPreferencesStore: InMemorySessionPreferencesStore = InMemorySessionPreferencesStore(),
     ): LoggedInPresenter {
         return LoggedInPresenter(
             matrixClient = matrixClient,
@@ -387,6 +393,8 @@ class LoggedInPresenterTest {
             networkMonitor = networkMonitor,
             localNetworkPermissionAdvisor = FakeLocalNetworkPermissionAdvisor(),
             permissionsPresenterFactory = FakePermissionsPresenterFactory(),
+            appForegroundStateService = appForegroundStateService,
+            sessionPreferencesStore = sessionPreferencesStore,
         )
     }
 }

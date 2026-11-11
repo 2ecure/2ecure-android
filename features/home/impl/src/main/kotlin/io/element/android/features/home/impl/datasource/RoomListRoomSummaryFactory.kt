@@ -61,6 +61,7 @@ class RoomListRoomSummaryFactory(
             isFavorite = roomInfo.isFavorite,
             inviteSender = roomInfo.inviter?.toInviteSender(),
             isDm = roomInfo.isDm,
+            dmUserId = if (roomInfo.isDm) roomInfo.heroes.firstOrNull()?.userId else null,
             isPublic = roomInfo.isPublic == true,
             canonicalAlias = roomInfo.canonicalAlias,
             displayType = when (roomInfo.currentUserMembership) {

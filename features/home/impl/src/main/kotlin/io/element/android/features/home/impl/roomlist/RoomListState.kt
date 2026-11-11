@@ -11,6 +11,8 @@ package io.element.android.features.home.impl.roomlist
 import androidx.compose.runtime.Immutable
 import io.element.android.features.home.impl.filters.RoomListFiltersState
 import io.element.android.features.home.impl.model.RoomListRoomSummary
+import io.element.android.features.home.impl.roomlist.privacy.PrivacyChoiceState
+import io.element.android.features.home.impl.roomlist.privacy.aPrivacyChoiceState
 import io.element.android.features.home.impl.search.GlobalSearchState
 import io.element.android.features.home.impl.search.RoomListSearchState
 import io.element.android.features.home.impl.spacefilters.SpaceFiltersState
@@ -34,6 +36,8 @@ data class RoomListState(
     val acceptDeclineInviteState: AcceptDeclineInviteState,
     val hideInvitesAvatars: Boolean,
     val canReportRoom: Boolean,
+    // 2ecure: «Who can find you?» after signing in (docs/privacy.md).
+    val privacyChoiceState: PrivacyChoiceState = aPrivacyChoiceState(),
     val eventSink: (RoomListEvent) -> Unit,
 ) {
     val displayFilters = contentState is RoomListContentState.Rooms

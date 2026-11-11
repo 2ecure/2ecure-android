@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2ecure: privacy and online status (docs/privacy.md). -->
+<resources>
+    <string name="twoecure_privacy_choice_title">Who can find you?</string>
+    <string name="twoecure_privacy_choice_message">Choose who finds you in search when they start a new chat.</string>
+    <string name="twoecure_privacy_choice_everyone">Everyone on 2ecure</string>
+    <string name="twoecure_privacy_choice_everyone_description">Everyone on 2ecure finds you in search and sees your name and profile picture there.</string>
+    <string name="twoecure_privacy_choice_contacts">Only people I chat with</string>
+    <string name="twoecure_privacy_choice_contacts_description">You don’t appear in search. People who already share a chat with you still find you, and only they see your profile picture.</string>
+    <string name="twoecure_privacy_choice_footer">People who know your address can still invite you. You can change this any time in Settings.</string>
+    <string name="twoecure_privacy_choice_continue">Continue</string>
+    <string name="twoecure_privacy_choice_error">Your choice could not be saved. Please try again.</string>
+    <string name="twoecure_presence_online">Online</string>
+    <string name="twoecure_presence_last_seen">Last seen %1$s</string>
+    <string name="twoecure_presence_share_footer">This also covers your online status: with it off, nobody sees whether you are online, and you don’t see it for others either.</string>
+</resources>

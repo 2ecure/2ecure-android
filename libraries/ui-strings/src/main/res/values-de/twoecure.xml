@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2ecure: privacy and online status (docs/privacy.md). -->
+<resources>
+    <string name="twoecure_privacy_choice_title">Wer darf dich finden?</string>
+    <string name="twoecure_privacy_choice_message">Lege fest, wer dich in der Suche findet, wenn jemand einen neuen Chat beginnt.</string>
+    <string name="twoecure_privacy_choice_everyone">Alle auf 2ecure</string>
+    <string name="twoecure_privacy_choice_everyone_description">Alle auf 2ecure finden dich in der Suche und sehen dort deinen Namen und dein Profilbild.</string>
+    <string name="twoecure_privacy_choice_contacts">Nur Personen, mit denen ich chatte</string>
+    <string name="twoecure_privacy_choice_contacts_description">Du erscheinst nicht in der Suche. Wer schon einen Chat mit dir teilt, findet dich weiterhin, und nur diese Personen sehen dein Profilbild.</string>
+    <string name="twoecure_privacy_choice_footer">Wer deine Adresse kennt, kann dich trotzdem einladen. Du kannst das jederzeit in den Einstellungen ändern.</string>
+    <string name="twoecure_privacy_choice_continue">Weiter</string>
+    <string name="twoecure_privacy_choice_error">Deine Auswahl konnte nicht gespeichert werden. Bitte versuche es noch einmal.</string>
+    <string name="twoecure_presence_online">Online</string>
+    <string name="twoecure_presence_last_seen">Zuletzt online %1$s</string>
+    <string name="twoecure_presence_share_footer">Gilt auch für den Online-Status: Ist ‹Präsenz teilen› aus, sieht niemand, ob du online bist, und du siehst es bei anderen auch nicht.</string>
+</resources>

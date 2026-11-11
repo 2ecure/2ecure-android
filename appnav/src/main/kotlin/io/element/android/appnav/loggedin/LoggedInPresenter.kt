@@ -39,15 +39,21 @@ import io.element.android.libraries.permissions.api.PermissionsEvent
 import io.element.android.libraries.permissions.api.PermissionsPresenter
 import io.element.android.libraries.permissions.api.localnetwork.LocalNetworkPermissionAdvisor
 import io.element.android.libraries.permissions.api.localnetwork.LocalNetworkPermissionDialog
+import io.element.android.libraries.preferences.api.store.SessionPreferencesStore
 import io.element.android.libraries.push.api.PushService
 import io.element.android.libraries.push.api.PusherRegistrationFailure
 import io.element.android.services.analytics.api.AnalyticsService
+import io.element.android.services.appnavstate.api.AppForegroundStateService
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import kotlin.time.Duration.Companion.seconds
 
 private val pusherTag = LoggerTag("Pusher", LoggerTag.PushLoggerTag)
 
@@ -62,6 +68,8 @@ class LoggedInPresenter(
     private val networkMonitor: NetworkMonitor,
     private val localNetworkPermissionAdvisor: LocalNetworkPermissionAdvisor,
     permissionsPresenterFactory: PermissionsPresenter.Factory,
+    private val appForegroundStateService: AppForegroundStateService,
+    private val sessionPreferencesStore: SessionPreferencesStore,
 ) : Presenter<LoggedInState> {
     private val localNetworkPermissionsPresenter: PermissionsPresenter =
         permissionsPresenterFactory.create(Manifest.permission.ACCESS_LOCAL_NETWORK)
@@ -122,6 +130,25 @@ class LoggedInPresenter(
             ) { verificationState, recoveryState ->
                 reportCryptoStatusToAnalytics(verificationState, recoveryState)
             }.launchIn(this)
+        }
+
+        LaunchedEffect(Unit) {
+            // 2ecure: Synapse's sliding sync doesn't keep presence alive (docs/privacy.md): «online» every minute while
+            // the app is in the foreground and shares its presence, «offline» otherwise.
+            combine(appForegroundStateService.isInForeground, sessionPreferencesStore.isSharePresenceEnabled()) { isInForeground, sharePresence ->
+                isInForeground && sharePresence
+            }
+                .distinctUntilChanged()
+                .collectLatest { isOnline ->
+                    if (isOnline) {
+                        while (true) {
+                            matrixClient.setOwnPresence(isOnline = true)
+                            delay(60.seconds)
+                        }
+                    } else {
+                        matrixClient.setOwnPresence(isOnline = false)
+                    }
+                }
         }
 
         LaunchedEffect(Unit) {

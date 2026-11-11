@@ -81,6 +81,7 @@ import io.element.android.libraries.matrix.api.encryption.EncryptionService
 import io.element.android.libraries.matrix.api.encryption.identity.IdentityState
 import io.element.android.libraries.matrix.api.permalink.PermalinkParser
 import io.element.android.libraries.matrix.api.permalink.WebClientLinks
+import io.element.android.libraries.matrix.api.presence.PresenceStatusStore
 import io.element.android.libraries.matrix.api.room.JoinedRoom
 import io.element.android.libraries.matrix.api.room.RoomInfo
 import io.element.android.libraries.matrix.api.room.RoomMembersState
@@ -94,18 +95,21 @@ import io.element.android.libraries.matrix.ui.messages.reply.map
 import io.element.android.libraries.matrix.ui.model.dmUserStatus
 import io.element.android.libraries.matrix.ui.model.getAvatarData
 import io.element.android.libraries.matrix.ui.room.getDirectRoomMember
+import io.element.android.libraries.preferences.api.store.SessionPreferencesStore
 import io.element.android.libraries.textcomposer.model.MessageComposerMode
 import io.element.android.libraries.ui.strings.CommonStrings
 import io.element.android.services.analytics.api.AnalyticsService
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.time.Duration.Companion.seconds
 
 @AssistedInject
 class MessagesPresenter(
@@ -138,6 +142,8 @@ class MessagesPresenter(
     private val markAsFullyRead: MarkAsFullyRead,
     private val liveLocationShareManager: ActiveLiveLocationShareManager,
     @SessionCoroutineScope private val sessionCoroutineScope: CoroutineScope,
+    private val presenceStatusStore: PresenceStatusStore,
+    private val sessionPreferencesStore: SessionPreferencesStore,
 ) : Presenter<MessagesState> {
     @AssistedFactory
     interface Factory {
@@ -247,6 +253,23 @@ class MessagesPresenter(
             onPauseOrDispose {}
         }
 
+        // 2ecure: the other person's online status in a one-to-one chat, asked for once a minute while the chat is open
+        // and the app shares its own presence (docs/privacy.md).
+        val sharePresence by remember { sessionPreferencesStore.isSharePresenceEnabled() }.collectAsState(initial = false)
+        val presenceStatuses by presenceStatusStore.statuses.collectAsState()
+        val dmPresenceUserId = dmRoomMember?.userId?.takeIf { roomInfo.isDm && sharePresence }
+        LifecycleResumeEffect(dmPresenceUserId) {
+            val job = dmPresenceUserId?.let { userId ->
+                localCoroutineScope.launch {
+                    while (true) {
+                        presenceStatusStore.refresh(listOf(userId))
+                        delay(60.seconds)
+                    }
+                }
+            }
+            onPauseOrDispose { job?.cancel() }
+        }
+
         val redactEventAction = remember { mutableStateOf<AsyncAction<Unit>>(AsyncAction.Uninitialized) }
 
         fun handleEvent(event: MessagesEvent) {
@@ -354,6 +377,7 @@ class MessagesPresenter(
             pinnedMessagesBannerState = pinnedMessagesBannerState,
             dmUserVerificationState = dmUserVerificationState,
             dmUserStatus = roomInfo.dmUserStatus(),
+            dmPresence = dmPresenceUserId?.let { presenceStatuses[it] },
             roomMemberModerationState = roomMemberModerationState,
             topBarSharedHistoryIcon = topBarSharedHistoryIcon,
             successorRoom = roomInfo.successorRoom,

@@ -28,6 +28,7 @@ import io.element.android.libraries.matrix.api.notification.NotificationService
 import io.element.android.libraries.matrix.api.notificationsettings.NotificationSettingsService
 import io.element.android.libraries.matrix.api.oauth.AccountManagementAction
 import io.element.android.libraries.matrix.api.paths.SessionPaths
+import io.element.android.libraries.matrix.api.presence.PresenceStatus
 import io.element.android.libraries.matrix.api.pusher.PushersService
 import io.element.android.libraries.matrix.api.room.BaseRoom
 import io.element.android.libraries.matrix.api.room.CurrentUserMembership
@@ -459,6 +460,16 @@ interface MatrixClient : ClientUrlContentFetcher {
      * @param content the new content, as a raw JSON object.
      */
     suspend fun setAccountData(eventType: String, content: String): Result<Unit>
+
+    /**
+     * 2ecure: sets the own presence to online or offline and sends it to the homeserver at once (docs/privacy.md).
+     */
+    suspend fun setOwnPresence(isOnline: Boolean): Result<Unit>
+
+    /**
+     * 2ecure: [userId]'s online status from the homeserver, or null when it doesn't share it with this account.
+     */
+    suspend fun getPresence(userId: UserId): Result<PresenceStatus?>
 
     /**
      * Marks the room with the provided [roomId] as read, sending a fully read receipt for [eventId].

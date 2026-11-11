@@ -8,6 +8,9 @@
 package io.element.android.features.preferences.impl.moderation
 
 data class ModerationAndSafetyState(
+    // 2ecure: who can find the account (docs/privacy.md); null until read or while not chosen.
+    val discoverable: Boolean? = null,
+    val isSavingDiscoverable: Boolean = false,
     val isSharePresenceEnabled: Boolean,
     val mediaPreviewConfigState: MediaPreviewConfigState,
     val numberOfBlockedUsers: Int,

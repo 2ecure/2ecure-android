@@ -8,14 +8,19 @@
 package io.element.android.features.preferences.impl.moderation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import dev.zacsweers.metro.Inject
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.di.annotations.SessionCoroutineScope
 import io.element.android.libraries.matrix.api.MatrixClient
+import io.element.android.libraries.matrix.api.privacy.getDiscoverable
+import io.element.android.libraries.matrix.api.privacy.setDiscoverable
 import io.element.android.libraries.preferences.api.store.SessionPreferencesStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
@@ -38,6 +43,13 @@ class ModerationAndSafetyPresenter(
 
         val mediaPreviewConfigState = mediaPreviewConfigStateStore.state()
 
+        // 2ecure: who can find the account (docs/privacy.md).
+        var discoverable by remember { mutableStateOf<Boolean?>(null) }
+        var isSavingDiscoverable by remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) {
+            matrixClient.getDiscoverable().onSuccess { if (!isSavingDiscoverable) discoverable = it }
+        }
+
         val numberOfBlockedUsers by produceState(initialValue = 0) {
             matrixClient.ignoredUsersFlow
                 .onEach { value = it.size }
@@ -46,6 +58,15 @@ class ModerationAndSafetyPresenter(
 
         fun handleEvent(event: ModerationAndSafetyEvent) {
             when (event) {
+                is ModerationAndSafetyEvent.SetDiscoverable -> if (!isSavingDiscoverable && event.discoverable != discoverable) {
+                    val previous = discoverable
+                    discoverable = event.discoverable
+                    isSavingDiscoverable = true
+                    sessionCoroutineScope.launch {
+                        matrixClient.setDiscoverable(event.discoverable).onFailure { discoverable = previous }
+                        isSavingDiscoverable = false
+                    }
+                }
                 is ModerationAndSafetyEvent.SetSharePresenceEnabled -> sessionCoroutineScope.launch {
                     sessionPreferencesStore.setSharePresence(event.enabled)
                 }
@@ -55,6 +76,8 @@ class ModerationAndSafetyPresenter(
         }
 
         return ModerationAndSafetyState(
+            discoverable = discoverable,
+            isSavingDiscoverable = isSavingDiscoverable,
             isSharePresenceEnabled = isSharePresenceEnabled,
             mediaPreviewConfigState = mediaPreviewConfigState,
             numberOfBlockedUsers = numberOfBlockedUsers,

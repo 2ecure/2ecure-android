@@ -141,6 +141,26 @@ class ModerationAndSafetyPresenterTest {
         }
     }
 
+    @Test
+    fun `present - 2ecure - the privacy choice is read and changed`() = runTest {
+        val written = mutableListOf<Pair<String, String>>()
+        createModerationAndSafetyPresenter(
+            matrixClient = FakeMatrixClient(
+                getAccountDataLambda = { Result.success("""{"discoverable":false}""") },
+                setAccountDataLambda = { type, content ->
+                    written.add(type to content)
+                    Result.success(Unit)
+                },
+            ),
+        ).test {
+            val loaded = consumeItemsUntilPredicate { it.discoverable == false }.last()
+            loaded.eventSink(ModerationAndSafetyEvent.SetDiscoverable(true))
+            consumeItemsUntilPredicate { it.discoverable == true && !it.isSavingDiscoverable }
+            assertThat(written).containsExactly("com.2ecure.privacy" to """{"discoverable":true}""")
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     private fun CoroutineScope.createModerationAndSafetyPresenter(
         matrixClient: FakeMatrixClient = FakeMatrixClient(),
         sessionPreferencesStore: InMemorySessionPreferencesStore = InMemorySessionPreferencesStore(),

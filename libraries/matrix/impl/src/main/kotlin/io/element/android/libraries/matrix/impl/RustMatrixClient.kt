@@ -39,6 +39,7 @@ import io.element.android.libraries.matrix.api.media.MatrixMediaLoader
 import io.element.android.libraries.matrix.api.media.MediaSource
 import io.element.android.libraries.matrix.api.oauth.AccountManagementAction
 import io.element.android.libraries.matrix.api.paths.SessionPaths
+import io.element.android.libraries.matrix.api.presence.PresenceStatus
 import io.element.android.libraries.matrix.api.room.BaseRoom
 import io.element.android.libraries.matrix.api.room.CurrentUserMembership
 import io.element.android.libraries.matrix.api.room.JoinedRoom
@@ -68,6 +69,7 @@ import io.element.android.libraries.matrix.impl.media.RustMediaPreviewService
 import io.element.android.libraries.matrix.impl.notification.RustNotificationService
 import io.element.android.libraries.matrix.impl.notificationsettings.RustNotificationSettingsService
 import io.element.android.libraries.matrix.impl.oauth.toRustAction
+import io.element.android.libraries.matrix.impl.presence.parsePresenceStatus
 import io.element.android.libraries.matrix.impl.pushers.RustPushersService
 import io.element.android.libraries.matrix.impl.room.GetRoomResult
 import io.element.android.libraries.matrix.impl.room.NotJoinedRustRoom
@@ -105,6 +107,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
@@ -135,6 +138,7 @@ import org.matrix.rustcomponents.sdk.IgnoredUsersListener
 import org.matrix.rustcomponents.sdk.Membership
 import org.matrix.rustcomponents.sdk.NotificationProcessSetup
 import org.matrix.rustcomponents.sdk.PowerLevels
+import org.matrix.rustcomponents.sdk.PresenceState
 import org.matrix.rustcomponents.sdk.ProfileListener
 import org.matrix.rustcomponents.sdk.RoomInfoListener
 import org.matrix.rustcomponents.sdk.SendQueueRoomErrorListener
@@ -144,6 +148,9 @@ import org.matrix.rustcomponents.sdk.UserProfile
 import org.matrix.rustcomponents.sdk.use
 import timber.log.Timber
 import java.io.File
+import java.net.HttpURLConnection
+import java.net.URL
+import java.net.URLEncoder
 import java.util.Optional
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.io.encoding.Base64
@@ -932,6 +939,38 @@ class RustMatrixClient(
     override suspend fun setAccountData(eventType: String, content: String): Result<Unit> = withContext(sessionDispatcher) {
         runCatchingExceptions {
             innerClient.setAccountData(eventType, content)
+        }
+    }
+
+    override suspend fun setOwnPresence(isOnline: Boolean): Result<Unit> = withContext(sessionDispatcher) {
+        runCatchingExceptions {
+            innerClient.setPresence(if (isOnline) PresenceState.ONLINE else PresenceState.OFFLINE, true)
+        }
+    }
+
+    // 2ecure: the SDK cannot read presence, so this asks the homeserver with the session's current access token.
+    override suspend fun getPresence(userId: UserId): Result<PresenceStatus?> = withContext(Dispatchers.IO) {
+        runCatchingExceptions {
+            val session = innerClient.session()
+            val url = URL(
+                session.homeserverUrl.trimEnd('/') + "/_matrix/client/v3/presence/" + URLEncoder.encode(userId.value, "UTF-8") + "/status"
+            )
+            val connection = url.openConnection() as HttpURLConnection
+            try {
+                connection.connectTimeout = 15_000
+                connection.readTimeout = 15_000
+                connection.setRequestProperty("Authorization", "Bearer ${session.accessToken}")
+                when (val code = connection.responseCode) {
+                    HttpURLConnection.HTTP_OK -> connection.inputStream.bufferedReader().use {
+                        parsePresenceStatus(it.readText(), System.currentTimeMillis())
+                    }
+                    // Synapse shares presence only between people who share a room.
+                    HttpURLConnection.HTTP_FORBIDDEN, HttpURLConnection.HTTP_NOT_FOUND -> null
+                    else -> error("Presence request failed with HTTP $code")
+                }
+            } finally {
+                connection.disconnect()
+            }
         }
     }
 

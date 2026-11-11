@@ -52,6 +52,7 @@ import io.element.android.libraries.designsystem.atomic.atoms.UnreadIndicatorAto
 import io.element.android.libraries.designsystem.atomic.molecules.InviteButtonsRowMolecule
 import io.element.android.libraries.designsystem.components.avatar.Avatar
 import io.element.android.libraries.designsystem.components.avatar.AvatarType
+import io.element.android.libraries.designsystem.components.avatar.OnlineDot
 import io.element.android.libraries.designsystem.modifiers.onKeyboardContextMenuAction
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
@@ -200,19 +201,28 @@ private fun RoomSummaryScaffoldRow(
             .padding(horizontal = 16.dp, vertical = 11.dp)
             .height(IntrinsicSize.Min),
     ) {
-        Avatar(
-            avatarData = room.avatarData,
-            avatarType = if (room.isSpace) {
-                AvatarType.Space(isTombstoned = room.isTombstoned)
-            } else {
-                AvatarType.Room(
-                    heroes = room.heroes,
-                    isTombstoned = room.isTombstoned,
-                    isDm = room.isDm,
+        Box {
+            Avatar(
+                avatarData = room.avatarData,
+                avatarType = if (room.isSpace) {
+                    AvatarType.Space(isTombstoned = room.isTombstoned)
+                } else {
+                    AvatarType.Room(
+                        heroes = room.heroes,
+                        isTombstoned = room.isTombstoned,
+                        isDm = room.isDm,
+                    )
+                },
+                hideImage = hideAvatarImage,
+            )
+            // 2ecure: the other person in a one-to-one chat is online (docs/privacy.md).
+            if (room.isOnline) {
+                OnlineDot(
+                    size = 14.dp,
+                    modifier = Modifier.align(Alignment.BottomEnd),
                 )
-            },
-            hideImage = hideAvatarImage,
-        )
+            }
+        }
         Spacer(modifier = Modifier.width(16.dp))
         Column(
             modifier = Modifier.fillMaxWidth(),

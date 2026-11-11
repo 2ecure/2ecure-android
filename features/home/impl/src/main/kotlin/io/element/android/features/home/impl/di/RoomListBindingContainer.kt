@@ -15,6 +15,8 @@ import io.element.android.features.home.impl.filters.RoomListFiltersPresenter
 import io.element.android.features.home.impl.filters.RoomListFiltersState
 import io.element.android.features.home.impl.roomlist.RoomListPresenter
 import io.element.android.features.home.impl.roomlist.RoomListState
+import io.element.android.features.home.impl.roomlist.privacy.PrivacyChoicePresenter
+import io.element.android.features.home.impl.roomlist.privacy.PrivacyChoiceState
 import io.element.android.features.home.impl.search.GlobalSearchPresenter
 import io.element.android.features.home.impl.search.GlobalSearchState
 import io.element.android.features.home.impl.search.RoomListSearchPresenter
@@ -41,4 +43,7 @@ interface RoomListBindingContainer {
 
     @Binds
     fun bindGlobalSearchPresenter(presenter: GlobalSearchPresenter): Presenter<GlobalSearchState>
+
+    @Binds
+    fun bindPrivacyChoicePresenter(presenter: PrivacyChoicePresenter): Presenter<PrivacyChoiceState>
 }

@@ -8,8 +8,10 @@
 
 package io.element.android.features.messages.impl.topbars
 
+import android.text.format.DateUtils
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -42,6 +44,7 @@ import io.element.android.libraries.designsystem.components.avatar.Avatar
 import io.element.android.libraries.designsystem.components.avatar.AvatarData
 import io.element.android.libraries.designsystem.components.avatar.AvatarSize
 import io.element.android.libraries.designsystem.components.avatar.AvatarType
+import io.element.android.libraries.designsystem.components.avatar.OnlineDot
 import io.element.android.libraries.designsystem.components.avatar.anAvatarData
 import io.element.android.libraries.designsystem.components.button.BackButton
 import io.element.android.libraries.designsystem.preview.ElementPreview
@@ -49,8 +52,10 @@ import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.preview.ROOM_NAME
 import io.element.android.libraries.designsystem.theme.components.HorizontalDivider
 import io.element.android.libraries.designsystem.theme.components.Icon
+import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.TopAppBar
 import io.element.android.libraries.matrix.api.encryption.identity.IdentityState
+import io.element.android.libraries.matrix.api.presence.PresenceStatus
 import io.element.android.libraries.matrix.api.user.DisplayedStatus
 import io.element.android.libraries.matrix.ui.components.DisplayNameWithStatus
 import io.element.android.libraries.matrix.ui.components.aMatrixUserList
@@ -70,6 +75,7 @@ internal fun MessagesViewTopBar(
     isDm: Boolean = false,
     sharedHistoryIcon: SharedHistoryIcon,
     dmUserStatus: DisplayedStatus?,
+    dmPresence: PresenceStatus? = null,
     onRoomDetailsClick: () -> Unit,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -99,6 +105,7 @@ internal fun MessagesViewTopBar(
                     heroes = heroes,
                     isDm = isDm,
                     dmUserStatus = dmUserStatus,
+                    dmPresence = dmPresence,
                     modifier = titleModifier
                 )
 
@@ -154,29 +161,62 @@ private fun RoomAvatarAndNameRow(
     isTombstoned: Boolean,
     isDm: Boolean,
     dmUserStatus: DisplayedStatus?,
+    dmPresence: PresenceStatus?,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Avatar(
-            avatarData = roomAvatar,
-            avatarType = AvatarType.Room(
-                heroes = heroes,
-                isTombstoned = isTombstoned,
-                isDm = isDm,
-            ),
-        )
-        DisplayNameWithStatus(
-            name = roomName ?: stringResource(CommonStrings.common_no_room_name),
-            status = dmUserStatus,
-            modifier = Modifier.padding(start = 8.dp),
-            style = ElementTheme.typography.fontBodyLgMedium,
-            nameColor = ElementTheme.colors.textPrimary,
-            nameFontStyle = FontStyle.Italic.takeIf { roomName == null },
-        )
+        Box {
+            Avatar(
+                avatarData = roomAvatar,
+                avatarType = AvatarType.Room(
+                    heroes = heroes,
+                    isTombstoned = isTombstoned,
+                    isDm = isDm,
+                ),
+            )
+            // 2ecure: the other person is online (docs/privacy.md).
+            if (dmPresence?.isOnline == true) {
+                OnlineDot(
+                    size = 10.dp,
+                    modifier = Modifier.align(Alignment.BottomEnd),
+                )
+            }
+        }
+        Column(modifier = Modifier.padding(start = 8.dp)) {
+            DisplayNameWithStatus(
+                name = roomName ?: stringResource(CommonStrings.common_no_room_name),
+                status = dmUserStatus,
+                style = ElementTheme.typography.fontBodyLgMedium,
+                nameColor = ElementTheme.colors.textPrimary,
+                nameFontStyle = FontStyle.Italic.takeIf { roomName == null },
+            )
+            presenceSubtitle(dmPresence)?.let { subtitle ->
+                Text(
+                    text = subtitle,
+                    style = ElementTheme.typography.fontBodySmRegular,
+                    color = ElementTheme.colors.textSecondary,
+                    maxLines = 1,
+                )
+            }
+        }
     }
+}
+
+/**
+ * 2ecure: «Online» or «Last seen 5 minutes ago»; null when nothing is known.
+ */
+@Composable
+private fun presenceSubtitle(presence: PresenceStatus?): String? {
+    presence ?: return null
+    if (presence.isOnline) return stringResource(CommonStrings.twoecure_presence_online)
+    val lastActive = presence.lastActiveTimestamp ?: return null
+    val now = System.currentTimeMillis()
+    // At least a minute ago, so it never reads «0 minutes ago».
+    val relative = DateUtils.getRelativeTimeSpanString(minOf(lastActive, now - DateUtils.MINUTE_IN_MILLIS), now, DateUtils.MINUTE_IN_MILLIS)
+    return stringResource(CommonStrings.twoecure_presence_last_seen, relative.toString())
 }
 
 @PreviewsDayNight

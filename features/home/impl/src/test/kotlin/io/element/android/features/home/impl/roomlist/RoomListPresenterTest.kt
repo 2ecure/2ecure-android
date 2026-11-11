@@ -19,6 +19,7 @@ import io.element.android.features.home.impl.datasource.aRoomListRoomSummaryFact
 import io.element.android.features.home.impl.filters.RoomListFiltersState
 import io.element.android.features.home.impl.filters.aRoomListFiltersState
 import io.element.android.features.home.impl.model.createRoomListRoomSummary
+import io.element.android.features.home.impl.roomlist.privacy.aPrivacyChoiceState
 import io.element.android.features.home.impl.search.RoomListSearchEvent
 import io.element.android.features.home.impl.search.RoomListSearchState
 import io.element.android.features.home.impl.search.aGlobalSearchState
@@ -47,6 +48,8 @@ import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.matrix.api.core.SessionId
 import io.element.android.libraries.matrix.api.encryption.RecoveryState
+import io.element.android.libraries.matrix.api.presence.PresenceStatus
+import io.element.android.libraries.matrix.api.presence.PresenceStatusStore
 import io.element.android.libraries.matrix.api.room.CurrentUserMembership
 import io.element.android.libraries.matrix.api.room.RoomNotificationMode
 import io.element.android.libraries.matrix.api.roomlist.RoomList
@@ -57,9 +60,11 @@ import io.element.android.libraries.matrix.test.A_ROOM_ID_2
 import io.element.android.libraries.matrix.test.A_ROOM_ID_3
 import io.element.android.libraries.matrix.test.A_SESSION_ID
 import io.element.android.libraries.matrix.test.A_SESSION_ID_2
+import io.element.android.libraries.matrix.test.A_USER_ID_2
 import io.element.android.libraries.matrix.test.FakeMatrixClient
 import io.element.android.libraries.matrix.test.encryption.FakeEncryptionService
 import io.element.android.libraries.matrix.test.notificationsettings.FakeNotificationSettingsService
+import io.element.android.libraries.matrix.test.presence.FakePresenceStatusStore
 import io.element.android.libraries.matrix.test.room.FakeBaseRoom
 import io.element.android.libraries.matrix.test.room.aRoomInfo
 import io.element.android.libraries.matrix.test.room.aRoomMember
@@ -68,6 +73,7 @@ import io.element.android.libraries.matrix.test.roomlist.FakeDynamicRoomList
 import io.element.android.libraries.matrix.test.roomlist.FakeRoomListService
 import io.element.android.libraries.matrix.test.sync.FakeSyncService
 import io.element.android.libraries.matrix.test.verification.FakeSessionVerificationService
+import io.element.android.libraries.matrix.ui.components.aMatrixUser
 import io.element.android.libraries.preferences.api.store.SessionPreferencesStore
 import io.element.android.libraries.preferences.test.InMemorySessionPreferencesStore
 import io.element.android.libraries.push.api.battery.aBatteryOptimizationState
@@ -79,6 +85,7 @@ import io.element.android.libraries.sessionstorage.test.aSessionData
 import io.element.android.services.analytics.api.AnalyticsService
 import io.element.android.services.analytics.test.FakeAnalyticsService
 import io.element.android.services.analytics.test.watchers.FakeAnalyticsColdStartWatcher
+import io.element.android.services.appnavstate.test.FakeAppForegroundStateService
 import io.element.android.tests.testutils.EventsRecorder
 import io.element.android.tests.testutils.WarmUpRule
 import io.element.android.tests.testutils.consumeItemsUntilPredicate
@@ -756,6 +763,32 @@ class RoomListPresenterTest {
         }
     }
 
+    @Test
+    fun `present - 2ecure - one-to-one chats whose other person is online are marked`() = runTest {
+        val roomList = FakeDynamicRoomList(loadingState = MutableStateFlow(RoomList.LoadingState.Loaded(1)))
+        val roomListService = FakeRoomListService(createRoomListLambda = { roomList })
+        val presenceStatusStore = FakePresenceStatusStore(
+            initialStatuses = mapOf(A_USER_ID_2 to PresenceStatus(isOnline = true, lastActiveTimestamp = null)),
+        )
+        val presenter = createRoomListPresenter(
+            client = FakeMatrixClient(roomListService = roomListService),
+            presenceStatusStore = presenceStatusStore,
+        )
+        presenter.test {
+            roomList.summaries.emit(
+                listOf(
+                    aRoomSummary(info = aRoomInfo(isDm = true, heroes = listOf(aMatrixUser(id = A_USER_ID_2.value)))),
+                )
+            )
+            val state = consumeItemsUntilPredicate { state ->
+                (state.contentState as? RoomListContentState.Rooms)?.summaries?.any { it.isOnline } == true
+            }.last()
+            assertThat(state.contentAsRooms().summaries.first().dmUserId).isEqualTo(A_USER_ID_2)
+            assertThat(presenceStatusStore.refreshedUserIds.first()).containsExactly(A_USER_ID_2)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     private fun TestScope.createRoomListPresenter(
         client: MatrixClient = FakeMatrixClient(),
         leaveRoomState: LeaveRoomState = aLeaveRoomState(),
@@ -773,6 +806,7 @@ class RoomListPresenterTest {
         featureFlagService: FeatureFlagService = FakeFeatureFlagService(),
         markRoomAsRead: MarkRoomAsRead? = null,
         sessionStore: SessionStore = InMemorySessionStore(),
+        presenceStatusStore: PresenceStatusStore = FakePresenceStatusStore(),
     ) = RoomListPresenter(
         client = client,
         leaveRoomPresenter = { leaveRoomState },
@@ -806,5 +840,9 @@ class RoomListPresenterTest {
         coldStartWatcher = FakeAnalyticsColdStartWatcher(),
         featureFlagService = featureFlagService,
         sessionStore = sessionStore,
+        privacyChoicePresenter = { aPrivacyChoiceState() },
+        presenceStatusStore = presenceStatusStore,
+        sessionPreferencesStore = sessionPreferencesStore,
+        appForegroundStateService = FakeAppForegroundStateService(),
     )
 }

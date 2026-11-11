@@ -28,6 +28,7 @@ import io.element.android.libraries.matrix.api.notification.NotificationService
 import io.element.android.libraries.matrix.api.notificationsettings.NotificationSettingsService
 import io.element.android.libraries.matrix.api.oauth.AccountManagementAction
 import io.element.android.libraries.matrix.api.paths.SessionPaths
+import io.element.android.libraries.matrix.api.presence.PresenceStatus
 import io.element.android.libraries.matrix.api.pusher.PushersService
 import io.element.android.libraries.matrix.api.room.BaseRoom
 import io.element.android.libraries.matrix.api.room.JoinedRoom
@@ -127,8 +128,11 @@ class FakeMatrixClient(
     private val getJoinedRoomIdsResult: () -> Result<Set<RoomId>> = { Result.success(emptySet()) },
     private val getRecentEmojisLambda: () -> Result<List<String>> = { Result.success(emptyList()) },
     private val addRecentEmojiLambda: (String) -> Result<Unit> = { Result.success(Unit) },
-    private val getAccountDataLambda: (String) -> Result<String?> = { lambdaError() },
+    // 2ecure: nothing set by default, so presenters that read the privacy choice (docs/privacy.md) work in every test.
+    private val getAccountDataLambda: (String) -> Result<String?> = { Result.success(null) },
     private val setAccountDataLambda: (String, String) -> Result<Unit> = { _, _ -> lambdaError() },
+    private val setOwnPresenceLambda: (Boolean) -> Result<Unit> = { Result.success(Unit) },
+    private val getPresenceLambda: (UserId) -> Result<PresenceStatus?> = { Result.success(null) },
     private val markRoomAsFullyReadResult: (RoomId, EventId) -> Result<Unit> = { _, _ -> lambdaError() },
     private val markAllRoomsAsReadResult: () -> Result<Unit> = { Result.success(Unit) },
     private val performDatabaseVacuumLambda: () -> Result<Unit> = { lambdaError() },
@@ -438,6 +442,14 @@ class FakeMatrixClient(
 
     override suspend fun setAccountData(eventType: String, content: String): Result<Unit> {
         return setAccountDataLambda(eventType, content)
+    }
+
+    override suspend fun setOwnPresence(isOnline: Boolean): Result<Unit> {
+        return setOwnPresenceLambda(isOnline)
+    }
+
+    override suspend fun getPresence(userId: UserId): Result<PresenceStatus?> {
+        return getPresenceLambda(userId)
     }
 
     override suspend fun markRoomAsFullyRead(roomId: RoomId, eventId: EventId): Result<Unit> {

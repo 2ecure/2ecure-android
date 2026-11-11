@@ -30,6 +30,7 @@ import io.element.android.features.announcement.api.AnnouncementService
 import io.element.android.features.home.impl.datasource.RoomListDataSource
 import io.element.android.features.home.impl.filters.RoomListFiltersState
 import io.element.android.features.home.impl.filters.into
+import io.element.android.features.home.impl.roomlist.privacy.PrivacyChoiceState
 import io.element.android.features.home.impl.search.GlobalSearchState
 import io.element.android.features.home.impl.search.RoomListSearchEvent
 import io.element.android.features.home.impl.search.RoomListSearchState
@@ -52,18 +53,22 @@ import io.element.android.libraries.fullscreenintent.api.FullScreenIntentPermiss
 import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.matrix.api.encryption.RecoveryState
+import io.element.android.libraries.matrix.api.presence.PresenceStatusStore
 import io.element.android.libraries.matrix.api.roomlist.RoomList
 import io.element.android.libraries.matrix.api.roomlist.RoomListFilter
 import io.element.android.libraries.matrix.ui.safety.rememberHideInvitesAvatar
+import io.element.android.libraries.preferences.api.store.SessionPreferencesStore
 import io.element.android.libraries.push.api.battery.BatteryOptimizationState
 import io.element.android.libraries.sessionstorage.api.SessionStore
 import io.element.android.services.analytics.api.AnalyticsService
 import io.element.android.services.analytics.api.watchers.AnalyticsColdStartWatcher
 import io.element.android.services.analyticsproviders.api.trackers.captureInteraction
+import io.element.android.services.appnavstate.api.AppForegroundStateService
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -72,6 +77,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
 @Inject
 class RoomListPresenter(
@@ -92,6 +98,10 @@ class RoomListPresenter(
     private val globalSearchPresenter: Presenter<GlobalSearchState>,
     private val featureFlagService: FeatureFlagService,
     private val sessionStore: SessionStore,
+    private val privacyChoicePresenter: Presenter<PrivacyChoiceState>,
+    private val presenceStatusStore: PresenceStatusStore,
+    private val sessionPreferencesStore: SessionPreferencesStore,
+    private val appForegroundStateService: AppForegroundStateService,
 ) : Presenter<RoomListState> {
     private val encryptionService = client.encryptionService
 
@@ -104,6 +114,7 @@ class RoomListPresenter(
         val spaceFiltersState = spaceFiltersPresenter.present()
         val acceptDeclineInviteState = acceptDeclineInvitePresenter.present()
         val globalSearchState = globalSearchPresenter.present()
+        val privacyChoiceState = privacyChoicePresenter.present()
 
         LaunchedEffect(Unit) {
             roomListDataSource.launchIn(this)
@@ -188,13 +199,14 @@ class RoomListPresenter(
             featureFlagService.isFeatureEnabledFlow(FeatureFlags.UnreadIndicatorCount).collect { value = it }
         }
 
-        val contentState = roomListContentState(
+        val contentStateWithoutPresence = roomListContentState(
             securityBannerDismissed,
             showNewNotificationSoundBanner,
             showSwipeAvatarBanner,
             showUnreadCount,
             showAllActivity,
         )
+        val contentState = rememberContentStateWithOnlineStatus(contentStateWithoutPresence)
 
         return RoomListState(
             contextMenu = contextMenu.value,
@@ -208,8 +220,43 @@ class RoomListPresenter(
             acceptDeclineInviteState = acceptDeclineInviteState,
             hideInvitesAvatars = hideInvitesAvatar,
             canReportRoom = canReportRoom,
+            privacyChoiceState = privacyChoiceState,
             eventSink = ::handleEvent,
         )
+    }
+
+    /**
+     * 2ecure: marks the one-to-one chats whose other person is online (docs/privacy.md). Their status is asked for
+     * once a minute while the app is in the foreground and shares its own presence, for the 30 most recent ones.
+     */
+    @Composable
+    private fun rememberContentStateWithOnlineStatus(contentState: RoomListContentState): RoomListContentState {
+        val sharePresence by remember { sessionPreferencesStore.isSharePresenceEnabled() }.collectAsState(initial = false)
+        val isInForeground by appForegroundStateService.isInForeground.collectAsState()
+        val statuses by presenceStatusStore.statuses.collectAsState()
+        val dmUserIds = remember(contentState) {
+            (contentState as? RoomListContentState.Rooms)?.summaries.orEmpty().mapNotNull { it.dmUserId }.take(30)
+        }
+        LaunchedEffect(dmUserIds, sharePresence, isInForeground) {
+            if (sharePresence && isInForeground && dmUserIds.isNotEmpty()) {
+                while (true) {
+                    presenceStatusStore.refresh(dmUserIds)
+                    delay(60.seconds)
+                }
+            }
+        }
+        return remember(contentState, statuses, sharePresence) {
+            val onlineUserIds = if (sharePresence) statuses.filterValues { it.isOnline }.keys else emptySet()
+            if (contentState !is RoomListContentState.Rooms || onlineUserIds.isEmpty()) {
+                contentState
+            } else {
+                contentState.copy(
+                    summaries = contentState.summaries
+                        .map { if (it.dmUserId in onlineUserIds) it.copy(isOnline = true) else it }
+                        .toImmutableList()
+                )
+            }
+        }
     }
 
     @Composable
