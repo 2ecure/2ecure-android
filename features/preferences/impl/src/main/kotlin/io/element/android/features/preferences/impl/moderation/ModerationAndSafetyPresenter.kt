@@ -60,8 +60,9 @@ class ModerationAndSafetyPresenter(
             when (event) {
                 is ModerationAndSafetyEvent.SetDiscoverable -> if (!isSavingDiscoverable && event.discoverable != discoverable) {
                     val previous = discoverable
-                    discoverable = event.discoverable
+                    // Saving first: every write can show a new state, and this one must not look saved yet.
                     isSavingDiscoverable = true
+                    discoverable = event.discoverable
                     sessionCoroutineScope.launch {
                         matrixClient.setDiscoverable(event.discoverable).onFailure { discoverable = previous }
                         isSavingDiscoverable = false

@@ -64,14 +64,14 @@ class PrivacyChoicePresenter(
                     coroutineScope.launch {
                         // A choice made on another device in the meantime is kept, not overwritten.
                         if (client.getDiscoverable().getOrNull() != null) {
-                            isRequired = false
                             saveAction = AsyncAction.Uninitialized
+                            isRequired = false
                             return@launch
                         }
                         client.setDiscoverable(discoverable).fold(
                             onSuccess = {
-                                isRequired = false
                                 saveAction = AsyncAction.Success(Unit)
+                                isRequired = false
                             },
                             onFailure = { saveAction = AsyncAction.Failure(it) },
                         )
