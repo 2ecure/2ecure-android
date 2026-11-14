@@ -11,14 +11,17 @@ import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.presence.PresenceStatus
 import io.element.android.libraries.matrix.api.presence.PresenceStatusStore
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlin.time.Duration
 
 class FakePresenceStatusStore(
     initialStatuses: Map<UserId, PresenceStatus> = emptyMap(),
 ) : PresenceStatusStore {
     override val statuses = MutableStateFlow(initialStatuses)
     val refreshedUserIds = mutableListOf<List<UserId>>()
+    val refreshMaxAges = mutableListOf<Duration>()
 
-    override suspend fun refresh(userIds: List<UserId>) {
+    override suspend fun refresh(userIds: List<UserId>, maxAge: Duration) {
         refreshedUserIds.add(userIds)
+        refreshMaxAges.add(maxAge)
     }
 }

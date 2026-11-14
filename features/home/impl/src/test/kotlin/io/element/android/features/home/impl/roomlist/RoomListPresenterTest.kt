@@ -85,6 +85,7 @@ import io.element.android.libraries.sessionstorage.test.aSessionData
 import io.element.android.services.analytics.api.AnalyticsService
 import io.element.android.services.analytics.test.FakeAnalyticsService
 import io.element.android.services.analytics.test.watchers.FakeAnalyticsColdStartWatcher
+import io.element.android.services.appnavstate.api.AppForegroundStateService
 import io.element.android.services.appnavstate.test.FakeAppForegroundStateService
 import io.element.android.tests.testutils.EventsRecorder
 import io.element.android.tests.testutils.WarmUpRule
@@ -99,6 +100,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -784,7 +786,41 @@ class RoomListPresenterTest {
                 (state.contentState as? RoomListContentState.Rooms)?.summaries?.any { it.isOnline } == true
             }.last()
             assertThat(state.contentAsRooms().summaries.first().dmUserId).isEqualTo(A_USER_ID_2)
-            assertThat(presenceStatusStore.refreshedUserIds.first()).containsExactly(A_USER_ID_2)
+            assertThat(presenceStatusStore.refreshedUserIds).contains(listOf(A_USER_ID_2))
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `present - 2ecure - coming back to the foreground asks again for the one-to-one chats`() = runTest {
+        val roomList = FakeDynamicRoomList(loadingState = MutableStateFlow(RoomList.LoadingState.Loaded(1)))
+        val roomListService = FakeRoomListService(createRoomListLambda = { roomList })
+        val presenceStatusStore = FakePresenceStatusStore()
+        val appForegroundStateService = FakeAppForegroundStateService()
+        val presenter = createRoomListPresenter(
+            client = FakeMatrixClient(roomListService = roomListService),
+            presenceStatusStore = presenceStatusStore,
+            appForegroundStateService = appForegroundStateService,
+        )
+        presenter.test {
+            roomList.summaries.emit(
+                listOf(
+                    aRoomSummary(info = aRoomInfo(isDm = true, heroes = listOf(aMatrixUser(id = A_USER_ID_2.value)))),
+                )
+            )
+            consumeItemsUntilPredicate { state ->
+                (state.contentState as? RoomListContentState.Rooms)?.summaries?.any { it.dmUserId == A_USER_ID_2 } == true
+            }
+            runCurrent()
+            assertThat(presenceStatusStore.refreshedUserIds).contains(listOf(A_USER_ID_2))
+            appForegroundStateService.givenIsInForeground(false)
+            runCurrent()
+            val asked = presenceStatusStore.refreshedUserIds.size
+            appForegroundStateService.givenIsInForeground(true)
+            runCurrent()
+            assertThat(presenceStatusStore.refreshedUserIds.drop(asked)).contains(listOf(A_USER_ID_2))
+            assertThat(presenceStatusStore.refreshMaxAges.drop(asked)).contains(PresenceStatusStore.FOREGROUND_MAX_AGE)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -807,6 +843,7 @@ class RoomListPresenterTest {
         markRoomAsRead: MarkRoomAsRead? = null,
         sessionStore: SessionStore = InMemorySessionStore(),
         presenceStatusStore: PresenceStatusStore = FakePresenceStatusStore(),
+        appForegroundStateService: AppForegroundStateService = FakeAppForegroundStateService(),
     ) = RoomListPresenter(
         client = client,
         leaveRoomPresenter = { leaveRoomState },
@@ -843,6 +880,6 @@ class RoomListPresenterTest {
         privacyChoicePresenter = { aPrivacyChoiceState() },
         presenceStatusStore = presenceStatusStore,
         sessionPreferencesStore = sessionPreferencesStore,
-        appForegroundStateService = FakeAppForegroundStateService(),
+        appForegroundStateService = appForegroundStateService,
     )
 }

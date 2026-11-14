@@ -68,6 +68,7 @@ import io.element.android.libraries.matrix.api.core.toThreadId
 import io.element.android.libraries.matrix.api.encryption.identity.IdentityState
 import io.element.android.libraries.matrix.api.media.MediaSource
 import io.element.android.libraries.matrix.api.permalink.PermalinkParser
+import io.element.android.libraries.matrix.api.presence.PresenceStatusStore
 import io.element.android.libraries.matrix.api.room.MessageEventType
 import io.element.android.libraries.matrix.api.room.RoomMembersState
 import io.element.android.libraries.matrix.api.room.RoomMembershipState
@@ -127,6 +128,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -1277,6 +1279,41 @@ class MessagesPresenterTest {
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `present - 2ecure - a one-to-one chat asks for the other person's status on resume, then every 15 seconds until paused`() = runTest {
+        val room = FakeJoinedRoom(
+            baseRoom = FakeBaseRoom(
+                sessionId = A_SESSION_ID,
+                roomPermissions = roomPermissions(),
+                initialRoomInfo = aRoomInfo(isDm = true, isEncrypted = false)
+            ).apply {
+                givenRoomMembersState(RoomMembersState.Ready(persistentListOf(aRoomMember(userId = A_SESSION_ID), aRoomMember(userId = A_USER_ID_2))))
+            },
+            typingNoticeResult = { Result.success(Unit) },
+        )
+        val presenceStatusStore = FakePresenceStatusStore()
+        val presenter = createMessagesPresenter(joinedRoom = room, presenceStatusStore = presenceStatusStore)
+        val lifecycleOwner = FakeLifecycleOwner()
+        presenter.testWithLifecycleOwner(lifecycleOwner) {
+            runCurrent()
+            assertThat(presenceStatusStore.refreshedUserIds).isEmpty()
+            lifecycleOwner.givenState(Lifecycle.State.RESUMED)
+            runCurrent()
+            assertThat(presenceStatusStore.refreshedUserIds).containsExactly(listOf(A_USER_ID_2))
+            assertThat(presenceStatusStore.refreshMaxAges).containsExactly(PresenceStatusStore.OPEN_CHAT_MAX_AGE)
+            advanceTimeBy(PresenceStatusStore.OPEN_CHAT_INTERVAL)
+            runCurrent()
+            assertThat(presenceStatusStore.refreshedUserIds).containsExactly(listOf(A_USER_ID_2), listOf(A_USER_ID_2))
+            lifecycleOwner.givenState(Lifecycle.State.CREATED)
+            runCurrent()
+            advanceTimeBy(PresenceStatusStore.OPEN_CHAT_INTERVAL * 2)
+            runCurrent()
+            assertThat(presenceStatusStore.refreshedUserIds).hasSize(2)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     @Test
     fun `present - room without successor room has null successor info in state`() = runTest {
         val room = FakeJoinedRoom(
@@ -1622,6 +1659,7 @@ class MessagesPresenterTest {
         addRecentEmoji: AddRecentEmoji = AddRecentEmoji { _ -> lambdaError() },
         markAsFullyRead: MarkAsFullyRead = FakeMarkAsFullyRead(),
         liveLocationShareManager: FakeActiveLiveLocationShareManager = FakeActiveLiveLocationShareManager(),
+        presenceStatusStore: PresenceStatusStore = FakePresenceStatusStore(),
     ): MessagesPresenter {
         return MessagesPresenter(
             navigator = navigator,
@@ -1658,7 +1696,7 @@ class MessagesPresenterTest {
             markAsFullyRead = markAsFullyRead,
             liveLocationShareManager = liveLocationShareManager,
             sessionCoroutineScope = backgroundScope,
-            presenceStatusStore = FakePresenceStatusStore(),
+            presenceStatusStore = presenceStatusStore,
             sessionPreferencesStore = InMemorySessionPreferencesStore(),
         )
     }

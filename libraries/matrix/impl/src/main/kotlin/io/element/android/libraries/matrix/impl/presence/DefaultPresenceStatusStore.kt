@@ -14,20 +14,25 @@ import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.presence.PresenceStatus
 import io.element.android.libraries.matrix.api.presence.PresenceStatusStore
+import io.element.android.services.toolbox.api.systemclock.SystemClock
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.longOrNull
+import kotlin.time.Duration
 
 @ContributesBinding(SessionScope::class)
 @SingleIn(SessionScope::class)
 class DefaultPresenceStatusStore(
     private val matrixClient: MatrixClient,
+    private val clock: SystemClock,
 ) : PresenceStatusStore {
     private val mutex = Mutex()
     private val attempted = mutableMapOf<UserId, Long>()
@@ -36,40 +41,41 @@ class DefaultPresenceStatusStore(
     private val mutableStatuses = MutableStateFlow<Map<UserId, PresenceStatus>>(emptyMap())
     override val statuses: StateFlow<Map<UserId, PresenceStatus>> = mutableStatuses
 
-    override suspend fun refresh(userIds: List<UserId>) {
-        val now = System.currentTimeMillis()
-        // Failed requests wait like answered ones, so a failing server doesn't get a request storm.
+    override suspend fun refresh(userIds: List<UserId>, maxAge: Duration) {
+        val now = clock.epochMillis()
         val due = mutex.withLock {
             userIds.distinct()
-                .filter { userId -> userId !in inFlight && attempted[userId]?.let { now - it > RETRY_AFTER_MILLIS } ?: true }
-                .onEach { userId ->
-                    inFlight.add(userId)
-                    attempted[userId] = now
-                }
+                .filter { userId -> userId !in inFlight && attempted[userId]?.let { now - it >= maxAge.inWholeMilliseconds } ?: true }
+                .onEach { userId -> inFlight.add(userId) }
         }
         try {
             for (userId in due) {
+                // Failed requests wait like answered ones, so a failing server doesn't get a request storm. Only people
+                // actually asked wait: a refresh cancelled halfway (the list changed) leaves the others due.
+                mutex.withLock { attempted[userId] = clock.epochMillis() }
                 matrixClient.getPresence(userId).fold(
                     onSuccess = { status ->
-                        mutex.withLock { answered[userId] = System.currentTimeMillis() }
+                        mutex.withLock { answered[userId] = clock.epochMillis() }
                         mutableStatuses.update { if (status == null) it - userId else it + (userId to status) }
                     },
                     onFailure = {
                         // An old answer isn't shown for longer than the server keeps someone online without news.
                         val isStale = mutex.withLock {
-                            answered[userId]?.let { System.currentTimeMillis() - it > EXPIRY_MILLIS } ?: true
+                            answered[userId]?.let { clock.epochMillis() - it > EXPIRY_MILLIS } ?: true
                         }
                         if (isStale) mutableStatuses.update { it - userId }
                     },
                 )
             }
         } finally {
-            mutex.withLock { inFlight.removeAll(due.toSet()) }
+            // Also when cancelled, or these people would never be asked again.
+            withContext(NonCancellable) {
+                mutex.withLock { inFlight.removeAll(due.toSet()) }
+            }
         }
     }
 
     private companion object {
-        const val RETRY_AFTER_MILLIS = 50_000L
         const val EXPIRY_MILLIS = 180_000L
     }
 }

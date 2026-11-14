@@ -109,7 +109,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.time.Duration.Companion.seconds
 
 @AssistedInject
 class MessagesPresenter(
@@ -253,8 +252,9 @@ class MessagesPresenter(
             onPauseOrDispose {}
         }
 
-        // 2ecure: the other person's online status in a one-to-one chat, asked for once a minute while the chat is open
-        // and the app shares its own presence (docs/privacy.md).
+        // 2ecure: the other person's online status in a one-to-one chat, asked for when the chat opens or the app comes
+        // back to it (unless just asked), then every 15 seconds while it is open and the app shares its own presence
+        // (docs/privacy.md).
         val sharePresence by remember { sessionPreferencesStore.isSharePresenceEnabled() }.collectAsState(initial = false)
         val presenceStatuses by presenceStatusStore.statuses.collectAsState()
         val dmPresenceUserId = dmRoomMember?.userId?.takeIf { roomInfo.isDm && sharePresence }
@@ -262,8 +262,8 @@ class MessagesPresenter(
             val job = dmPresenceUserId?.let { userId ->
                 localCoroutineScope.launch {
                     while (true) {
-                        presenceStatusStore.refresh(listOf(userId))
-                        delay(60.seconds)
+                        presenceStatusStore.refresh(listOf(userId), PresenceStatusStore.OPEN_CHAT_MAX_AGE)
+                        delay(PresenceStatusStore.OPEN_CHAT_INTERVAL)
                     }
                 }
             }

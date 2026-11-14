@@ -227,7 +227,8 @@ class RoomListPresenter(
 
     /**
      * 2ecure: marks the one-to-one chats whose other person is online (docs/privacy.md). Their status is asked for
-     * once a minute while the app is in the foreground and shares its own presence, for the 30 most recent ones.
+     * while the app is in the foreground and shares its own presence, for the 30 most recent ones: when the app comes
+     * to the foreground (whoever wasn't asked in the last 15 seconds), then once a minute; people new in the list at once.
      */
     @Composable
     private fun rememberContentStateWithOnlineStatus(contentState: RoomListContentState): RoomListContentState {
@@ -237,12 +238,19 @@ class RoomListPresenter(
         val dmUserIds = remember(contentState) {
             (contentState as? RoomListContentState.Rooms)?.summaries.orEmpty().mapNotNull { it.dmUserId }.take(30)
         }
-        LaunchedEffect(dmUserIds, sharePresence, isInForeground) {
-            if (sharePresence && isInForeground && dmUserIds.isNotEmpty()) {
+        val currentDmUserIds by rememberUpdatedState(dmUserIds)
+        LaunchedEffect(sharePresence, isInForeground) {
+            if (sharePresence && isInForeground) {
+                presenceStatusStore.refresh(currentDmUserIds, PresenceStatusStore.FOREGROUND_MAX_AGE)
                 while (true) {
-                    presenceStatusStore.refresh(dmUserIds)
                     delay(60.seconds)
+                    presenceStatusStore.refresh(currentDmUserIds)
                 }
+            }
+        }
+        LaunchedEffect(dmUserIds) {
+            if (sharePresence && isInForeground && dmUserIds.isNotEmpty()) {
+                presenceStatusStore.refresh(dmUserIds)
             }
         }
         return remember(contentState, statuses, sharePresence) {
