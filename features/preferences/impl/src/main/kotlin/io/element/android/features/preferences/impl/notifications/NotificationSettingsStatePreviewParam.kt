@@ -52,6 +52,7 @@ open class NotificationSettingsStatePreviewParam : PreviewParameterProvider<Noti
                     matrixSettings = aValidMatrixSettings(
                         inviteForMeNotificationsEnabled = false,
                         atRoomNotificationsEnabled = false,
+                        reactionNotificationsEnabled = true,
                     ),
                     showAllActivityInRoomList = true,
                 ),
@@ -199,12 +200,14 @@ fun aValidMatrixSettings(
     atRoomNotificationsEnabled: Boolean = true,
     callNotificationsEnabled: Boolean = true,
     inviteForMeNotificationsEnabled: Boolean = true,
+    reactionNotificationsEnabled: Boolean = false,
     defaultGroupNotificationMode: RoomNotificationMode? = RoomNotificationMode.MENTIONS_AND_KEYWORDS_ONLY,
     defaultOneToOneNotificationMode: RoomNotificationMode? = RoomNotificationMode.ALL_MESSAGES,
 ) = NotificationSettingsState.MatrixSettings.Valid(
     atRoomNotificationsEnabled = atRoomNotificationsEnabled,
     callNotificationsEnabled = callNotificationsEnabled,
     inviteForMeNotificationsEnabled = inviteForMeNotificationsEnabled,
+    reactionNotificationsEnabled = reactionNotificationsEnabled,
     defaultGroupNotificationMode = defaultGroupNotificationMode,
     defaultOneToOneNotificationMode = defaultOneToOneNotificationMode,
 )

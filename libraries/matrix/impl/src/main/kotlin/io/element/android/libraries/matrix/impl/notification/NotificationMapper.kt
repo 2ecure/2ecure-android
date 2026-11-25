@@ -19,6 +19,10 @@ import io.element.android.libraries.matrix.api.notification.NotificationContent
 import io.element.android.libraries.matrix.api.notification.NotificationData
 import io.element.android.libraries.matrix.impl.room.join.map
 import io.element.android.services.toolbox.api.systemclock.SystemClock
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.matrix.rustcomponents.sdk.NotificationEvent
 import org.matrix.rustcomponents.sdk.NotificationItem
 import org.matrix.rustcomponents.sdk.use
@@ -53,7 +57,7 @@ class NotificationMapper(
                     isEncrypted = item.roomInfo.isEncrypted.orFalse(),
                     isNoisy = item.isNoisy.orFalse(),
                     timestamp = timestamp,
-                    content = notificationContentMapper.map(item.event).getOrThrow(),
+                    content = notificationContentMapper.map(item.event).getOrThrow().withReactionKey(item.rawEvent),
                     hasMention = item.hasMention.orFalse(),
                     roomJoinRule = item.roomInfo.joinRule?.map(),
                 )
@@ -74,6 +78,21 @@ class NotificationContentMapper {
                 )
             )
         }
+}
+
+/**
+ * 2ecure: the SDK's reaction content has no key, but the notification item carries the decrypted event's JSON, whose
+ * `content.m.relates_to.key` is the emoji (or text) of the reaction.
+ */
+internal fun NotificationContent.withReactionKey(rawEvent: String): NotificationContent {
+    if (this !is NotificationContent.MessageLike.ReactionContent) return this
+    val key = runCatchingExceptions {
+        Json.parseToJsonElement(rawEvent).jsonObject["content"]
+            ?.jsonObject?.get("m.relates_to")
+            ?.jsonObject?.get("key")
+            ?.jsonPrimitive?.contentOrNull
+    }.getOrNull()
+    return copy(key = key?.takeIf { it.isNotBlank() })
 }
 
 private fun NotificationItem.timestamp(): Long? {

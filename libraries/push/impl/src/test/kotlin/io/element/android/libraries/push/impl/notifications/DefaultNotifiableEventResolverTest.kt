@@ -12,6 +12,7 @@ import android.content.Context
 import com.google.common.truth.Truth.assertThat
 import io.element.android.libraries.featureflag.test.FakeFeatureFlagService
 import io.element.android.libraries.matrix.api.core.EventId
+import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.exception.NotificationResolverException
 import io.element.android.libraries.matrix.api.media.MediaSource
 import io.element.android.libraries.matrix.api.notification.CallIntent
@@ -19,6 +20,7 @@ import io.element.android.libraries.matrix.api.notification.NotificationContent
 import io.element.android.libraries.matrix.api.notification.NotificationData
 import io.element.android.libraries.matrix.api.notification.RtcNotificationType
 import io.element.android.libraries.matrix.api.room.RoomMembershipState
+import io.element.android.libraries.matrix.api.room.RoomNotificationMode
 import io.element.android.libraries.matrix.api.timeline.item.event.AudioMessageType
 import io.element.android.libraries.matrix.api.timeline.item.event.EmoteMessageType
 import io.element.android.libraries.matrix.api.timeline.item.event.EventType
@@ -48,6 +50,7 @@ import io.element.android.libraries.matrix.test.FakeMatrixClient
 import io.element.android.libraries.matrix.test.FakeMatrixClientProvider
 import io.element.android.libraries.matrix.test.notification.FakeNotificationService
 import io.element.android.libraries.matrix.test.notification.aNotificationData
+import io.element.android.libraries.matrix.test.notificationsettings.FakeNotificationSettingsService
 import io.element.android.libraries.matrix.test.permalink.FakePermalinkParser
 import io.element.android.libraries.push.impl.db.PushRequest
 import io.element.android.libraries.push.impl.notifications.fake.FakeNotificationMediaRepo
@@ -1069,11 +1072,132 @@ class DefaultNotifiableEventResolverTest : RobolectricTest() {
         testNoResults(NotificationContent.StateEvent.SpaceParent)
     }
 
-    private fun testNoResults(content: NotificationContent) = runTest {
+    // 2ecure: reactions to your own messages (push rule com.2ecure.reactions).
+    @Test
+    fun `resolve reaction to my message`() = runTest {
+        val sut = createDefaultNotifiableEventResolver(
+            notificationResult = Result.success(
+                mapOf(AN_EVENT_ID to Result.success(aNotificationData(content = aReaction(key = "👍"))))
+            )
+        )
+        val request = aPushRequest(A_SESSION_ID, A_ROOM_ID, AN_EVENT_ID, "firebase")
+        val result = sut.resolveEvents(A_SESSION_ID, listOf(request))
+        val expectedResult = ResolvedPushEvent.Event(
+            aNotifiableMessageEvent(body = "Reacted 👍 to your message: “See you tomorrow”", noisy = true)
+        )
+        assertThat(result.getEvent(request)).isEqualTo(Result.success(expectedResult))
+    }
+
+    @Test
+    fun `resolve reaction to my message without its key and content`() = runTest {
+        val sut = createDefaultNotifiableEventResolver(
+            notificationResult = Result.success(
+                mapOf(AN_EVENT_ID to Result.success(aNotificationData(content = aReaction(key = null, relatedEventContent = null))))
+            )
+        )
+        val request = aPushRequest(A_SESSION_ID, A_ROOM_ID, AN_EVENT_ID, "firebase")
+        val result = sut.resolveEvents(A_SESSION_ID, listOf(request))
+        val expectedResult = ResolvedPushEvent.Event(
+            aNotifiableMessageEvent(body = "Reacted to your message", noisy = true)
+        )
+        assertThat(result.getEvent(request)).isEqualTo(Result.success(expectedResult))
+    }
+
+    @Test
+    fun `resolve reaction to my message quotes at most 80 characters of it`() = runTest {
+        val longText = "a".repeat(100)
+        val sut = createDefaultNotifiableEventResolver(
+            notificationResult = Result.success(
+                mapOf(
+                    AN_EVENT_ID to Result.success(
+                        aNotificationData(
+                            content = aReaction(
+                                key = "❤️",
+                                relatedEventContent = NotificationContent.MessageLike.RoomMessage(
+                                    senderId = A_SESSION_ID,
+                                    messageType = TextMessageType(body = longText, formatted = null),
+                                ),
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        val request = aPushRequest(A_SESSION_ID, A_ROOM_ID, AN_EVENT_ID, "firebase")
+        val result = sut.resolveEvents(A_SESSION_ID, listOf(request))
+        val expectedResult = ResolvedPushEvent.Event(
+            aNotifiableMessageEvent(body = "Reacted ❤️ to your message: “${"a".repeat(80)}…”", noisy = true)
+        )
+        assertThat(result.getEvent(request)).isEqualTo(Result.success(expectedResult))
+    }
+
+    @Test
+    fun `resolve reaction to my message never cuts the quote inside an emoji`() = runTest {
+        val text = "a".repeat(79) + "😀" + "b".repeat(10)
+        val sut = createDefaultNotifiableEventResolver(
+            notificationResult = Result.success(
+                mapOf(
+                    AN_EVENT_ID to Result.success(
+                        aNotificationData(
+                            content = aReaction(
+                                key = "👍",
+                                relatedEventContent = NotificationContent.MessageLike.RoomMessage(
+                                    senderId = A_SESSION_ID,
+                                    messageType = TextMessageType(body = text, formatted = null),
+                                ),
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        val request = aPushRequest(A_SESSION_ID, A_ROOM_ID, AN_EVENT_ID, "firebase")
+        val result = sut.resolveEvents(A_SESSION_ID, listOf(request))
+        val expectedResult = ResolvedPushEvent.Event(
+            aNotifiableMessageEvent(body = "Reacted 👍 to your message: “${"a".repeat(79)}…”", noisy = true)
+        )
+        assertThat(result.getEvent(request)).isEqualTo(Result.success(expectedResult))
+    }
+
+    @Test
+    fun `reactions to someone else's message, own reactions and reactions in a muted room are not shown`() {
+        testNoResults(aReaction(relatedEventSenderId = A_USER_ID_2))
+        testNoResults(aReaction(relatedEventSenderId = null))
+        testNoResults(aReaction(senderId = A_SESSION_ID))
+        testNoResults(
+            content = aReaction(),
+            notificationSettingsService = FakeNotificationSettingsService(
+                initialRoomMode = RoomNotificationMode.MUTE,
+                initialRoomModeIsDefault = false,
+            ),
+        )
+    }
+
+    private fun aReaction(
+        senderId: UserId? = A_USER_ID_2,
+        key: String? = "👍",
+        relatedEventSenderId: UserId? = A_SESSION_ID,
+        relatedEventContent: NotificationContent? = NotificationContent.MessageLike.RoomMessage(
+            senderId = A_SESSION_ID,
+            messageType = TextMessageType(body = "See you\n  tomorrow", formatted = null),
+        ),
+    ) = NotificationContent.MessageLike.ReactionContent(
+        relatedEventId = AN_EVENT_ID_2.value,
+        senderId = senderId,
+        key = key,
+        relatedEventSenderId = relatedEventSenderId,
+        relatedEventContent = relatedEventContent,
+    )
+
+    private fun testNoResults(
+        content: NotificationContent,
+        notificationSettingsService: FakeNotificationSettingsService = FakeNotificationSettingsService(),
+    ) = runTest {
         val sut = createDefaultNotifiableEventResolver(
             notificationResult = Result.success(
                 mapOf(AN_EVENT_ID to Result.success(aNotificationData(content = content)))
-            )
+            ),
+            notificationSettingsService = notificationSettingsService,
         )
         val request = aPushRequest(A_SESSION_ID, A_ROOM_ID, AN_EVENT_ID, "firebase")
         val result = sut.resolveEvents(A_SESSION_ID, listOf(request))
@@ -1091,6 +1215,7 @@ class DefaultNotifiableEventResolverTest : RobolectricTest() {
         notificationResult: Result<Map<EventId, Result<NotificationData>>> = Result.success(emptyMap()),
         callNotificationEventResolver: FakeCallNotificationEventResolver = FakeCallNotificationEventResolver(),
         sessionStore: SessionStore = InMemorySessionStore(),
+        notificationSettingsService: FakeNotificationSettingsService = FakeNotificationSettingsService(),
     ): DefaultNotifiableEventResolver {
         val context = RuntimeEnvironment.getApplication() as Context
         notificationService?.givenGetNotificationsResult(notificationResult)
@@ -1098,7 +1223,7 @@ class DefaultNotifiableEventResolverTest : RobolectricTest() {
             if (notificationService == null) {
                 Result.failure(IllegalStateException("Client not found"))
             } else {
-                Result.success(FakeMatrixClient(notificationService = notificationService))
+                Result.success(FakeMatrixClient(notificationService = notificationService, notificationSettingsService = notificationSettingsService))
             }
         })
         val notificationMediaRepoFactory = NotificationMediaRepo.Factory {

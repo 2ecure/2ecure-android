@@ -36,6 +36,7 @@ class FakeNotificationSettingsService(
     private var roomNotificationModeIsDefault: Boolean = initialRoomModeIsDefault
     private var callNotificationsEnabled = false
     private var inviteNotificationsEnabled = false
+    private var reactionNotificationsEnabled = false
     private var atRoomNotificationsEnabled = false
     private var setNotificationModeError: Throwable? = null
     private var restoreDefaultNotificationModeError: Throwable? = null
@@ -151,6 +152,15 @@ class FakeNotificationSettingsService(
 
     override suspend fun setInviteForMeEnabled(enabled: Boolean): Result<Unit> {
         inviteNotificationsEnabled = enabled
+        return Result.success(Unit)
+    }
+
+    override suspend fun isReactionNotificationsEnabled(): Result<Boolean> {
+        return Result.success(reactionNotificationsEnabled)
+    }
+
+    override suspend fun setReactionNotificationsEnabled(enabled: Boolean): Result<Unit> {
+        reactionNotificationsEnabled = enabled
         return Result.success(Unit)
     }
 

@@ -37,6 +37,7 @@ import io.element.android.libraries.matrix.api.notification.NotificationContent
 import io.element.android.libraries.matrix.api.notification.NotificationData
 import io.element.android.libraries.matrix.api.permalink.PermalinkParser
 import io.element.android.libraries.matrix.api.room.RoomMembershipState
+import io.element.android.libraries.matrix.api.room.RoomNotificationMode
 import io.element.android.libraries.matrix.api.room.join.JoinRule
 import io.element.android.libraries.matrix.api.timeline.item.event.AudioMessageType
 import io.element.android.libraries.matrix.api.timeline.item.event.EmoteMessageType
@@ -61,8 +62,12 @@ import io.element.android.libraries.sessionstorage.api.SessionStore
 import io.element.android.libraries.ui.strings.CommonStrings
 import io.element.android.services.toolbox.api.strings.StringProvider
 import timber.log.Timber
+import java.text.BreakIterator
 
 private val loggerTag = LoggerTag("DefaultNotifiableEventResolver", LoggerTag.NotificationLoggerTag)
+
+// 2ecure: how much of the message reacted to a reaction notification quotes.
+private const val MAX_QUOTE_LENGTH = 80
 
 /**
  * Result of resolving a batch of push events.
@@ -146,6 +151,7 @@ class DefaultNotifiableEventResolver(
 
     private fun NotificationContent.senderIdOrNull(): UserId? = when (this) {
         is NotificationContent.MessageLike.RoomMessage -> senderId
+        is NotificationContent.MessageLike.ReactionContent -> senderId
         is NotificationContent.MessageLike.Poll -> senderId
         is NotificationContent.MessageLike.CallInvite -> senderId
         is NotificationContent.MessageLike.RtcNotification -> senderId
@@ -289,8 +295,31 @@ class DefaultNotifiableEventResolver(
                 ResolvedPushEvent.Event(notifiableEventMessage)
             }
             is NotificationContent.MessageLike.ReactionContent -> {
-                Timber.tag(loggerTag.value).d("Ignoring notification for reaction")
-                throw NotificationResolverException.EventFilteredOut
+                // 2ecure: reactions only get here when the account turned on notifications for reactions to its own
+                // messages (push rule `com.2ecure.reactions`). The rule can't tell whose message was reacted to, so
+                // only reactions by someone else to a message of this account are shown, and none in a muted room.
+                val reactionSenderId = content.senderId
+                if (reactionSenderId == null || reactionSenderId == userId || content.relatedEventSenderId != userId || isRoomMuted(client)) {
+                    Timber.tag(loggerTag.value).d("Ignoring notification for reaction")
+                    throw NotificationResolverException.EventFilteredOut
+                }
+                val notifiableMessageEvent = buildNotifiableMessageEvent(
+                    sessionId = userId,
+                    senderId = reactionSenderId,
+                    roomId = roomId,
+                    eventId = eventId,
+                    // The rule has no sound (Element Web would play it for every reaction); a reaction to your
+                    // message is worth one, like a message.
+                    noisy = true,
+                    timestamp = this.timestamp,
+                    senderDisambiguatedDisplayName = getDisambiguatedDisplayName(reactionSenderId),
+                    body = descriptionFromReaction(content),
+                    roomName = roomDisplayName,
+                    roomIsDm = isDm,
+                    roomAvatarPath = roomAvatarUrl,
+                    senderAvatarPath = senderAvatarUrl,
+                )
+                ResolvedPushEvent.Event(notifiableMessageEvent)
             }
             NotificationContent.MessageLike.RoomEncrypted -> {
                 Timber.tag(loggerTag.value).w("Notification with encrypted content -> fallback")
@@ -417,6 +446,43 @@ class DefaultNotifiableEventResolver(
             is GalleryMessageType -> messageType.body
             is OtherMessageType -> messageType.body
         }
+    }
+
+    // The rule may come before the room's mute rule, so the mute is checked here; when it can't be read, no reaction alerts.
+    private suspend fun NotificationData.isRoomMuted(client: MatrixClient): Boolean {
+        return client.notificationSettingsService.getRoomNotificationSettings(roomId, isEncrypted, isDm)
+            .getOrNull()
+            ?.let { it.mode == RoomNotificationMode.MUTE }
+            ?: true
+    }
+
+    /** 2ecure: «Reacted ❤️ to your message: “See you tomorrow!”», shortened to what the message said when it could be read. */
+    private fun descriptionFromReaction(content: NotificationContent.MessageLike.ReactionContent): String {
+        val quote = when (val reacted = content.relatedEventContent) {
+            is NotificationContent.MessageLike.RoomMessage -> when (val messageType = reacted.messageType) {
+                is EmoteMessageType -> messageType.body
+                else -> descriptionFromMessageContent(reacted, senderDisambiguatedDisplayName = "", hasImageUri = false)
+            }
+            is NotificationContent.MessageLike.Poll -> reacted.question
+            else -> null
+        }?.let(::shortQuote)
+        val key = content.key
+        return when {
+            key != null && quote != null -> stringProvider.getString(CommonStrings.twoecure_notification_reaction_with_quote, key, quote)
+            key != null -> stringProvider.getString(CommonStrings.twoecure_notification_reaction, key)
+            quote != null -> stringProvider.getString(CommonStrings.twoecure_notification_reaction_no_key_with_quote, quote)
+            else -> stringProvider.getString(CommonStrings.twoecure_notification_reaction_no_key)
+        }
+    }
+
+    private fun shortQuote(text: String): String? {
+        val oneLine = text.replace(Regex("\\s+"), " ").trim()
+        if (oneLine.isEmpty()) return null
+        if (oneLine.length <= MAX_QUOTE_LENGTH) return oneLine
+        // Cut between characters, never inside an emoji.
+        val boundaries = BreakIterator.getCharacterInstance().apply { setText(oneLine) }
+        val end = boundaries.preceding(MAX_QUOTE_LENGTH + 1).takeIf { it > 0 } ?: MAX_QUOTE_LENGTH
+        return oneLine.substring(0, end).trimEnd() + "…"
     }
 
     private fun descriptionFromRoomMembershipInvite(

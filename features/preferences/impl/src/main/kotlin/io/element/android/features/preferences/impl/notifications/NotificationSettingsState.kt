@@ -54,6 +54,8 @@ data class NotificationSettingsState(
             val atRoomNotificationsEnabled: Boolean,
             val callNotificationsEnabled: Boolean,
             val inviteForMeNotificationsEnabled: Boolean,
+            // 2ecure: someone else's reaction to one of your messages (push rule com.2ecure.reactions).
+            val reactionNotificationsEnabled: Boolean,
             val defaultGroupNotificationMode: RoomNotificationMode?,
             val defaultOneToOneNotificationMode: RoomNotificationMode?,
         ) : MatrixSettings

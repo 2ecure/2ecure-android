@@ -205,6 +205,26 @@ class NotificationSettingsPresenterTest {
         }
     }
 
+    // 2ecure: reactions to your messages.
+    @Test
+    fun `present - set reaction notifications enabled`() = runTest {
+        val presenter = createNotificationSettingsPresenter()
+        presenter.test {
+            val loadedState = consumeItemsUntilPredicate {
+                (it.matrixSettings as? NotificationSettingsState.MatrixSettings.Valid)?.reactionNotificationsEnabled == false
+            }.last()
+            val validMatrixState = loadedState.matrixSettings as? NotificationSettingsState.MatrixSettings.Valid
+            assertThat(validMatrixState?.reactionNotificationsEnabled).isFalse()
+            loadedState.eventSink(NotificationSettingsEvent.SetReactionNotificationsEnabled(true))
+            val updatedState = consumeItemsUntilPredicate {
+                (it.matrixSettings as? NotificationSettingsState.MatrixSettings.Valid)?.reactionNotificationsEnabled == true
+            }.last()
+            val updatedMatrixState = updatedState.matrixSettings as? NotificationSettingsState.MatrixSettings.Valid
+            assertThat(updatedMatrixState?.reactionNotificationsEnabled).isTrue()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     @Test
     fun `present - set atRoom notifications enabled`() = runTest {
         val presenter = createNotificationSettingsPresenter()

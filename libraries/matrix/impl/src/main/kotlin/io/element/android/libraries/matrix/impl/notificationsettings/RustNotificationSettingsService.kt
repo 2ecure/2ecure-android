@@ -24,6 +24,7 @@ import kotlinx.coroutines.withContext
 import org.matrix.rustcomponents.sdk.Client
 import org.matrix.rustcomponents.sdk.NotificationSettingsDelegate
 import org.matrix.rustcomponents.sdk.NotificationSettingsException
+import org.matrix.rustcomponents.sdk.RuleKind
 import timber.log.Timber
 
 class RustNotificationSettingsService(
@@ -32,6 +33,8 @@ class RustNotificationSettingsService(
     private val dispatchers: CoroutineDispatchers,
 ) : NotificationSettingsService {
     private val notificationSettings by suspendLazy(sessionCoroutineScope.coroutineContext + dispatchers.io) { client.getNotificationSettings() }
+    // 2ecure: the reaction switch's last successful write, until the synced push rules show it.
+    @Volatile private var reactionNotificationsWritten: Boolean? = null
     private val _notificationSettingsChangeFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     override val notificationSettingsChangeFlow: SharedFlow<Unit> = _notificationSettingsChangeFlow.asSharedFlow()
 
@@ -132,6 +135,32 @@ class RustNotificationSettingsService(
     override suspend fun setInviteForMeEnabled(enabled: Boolean): Result<Unit> = withContext(dispatchers.io) {
         runCatchingExceptions {
             notificationSettings.await().setInviteForMeEnabled(enabled)
+        }
+    }
+
+    override suspend fun isReactionNotificationsEnabled(): Result<Boolean> = withContext(dispatchers.io) {
+        runCatchingExceptions {
+            val synced = ReactionPushRule.isEnabled(notificationSettings.await().getRawPushRules())
+            // The rules are read from the synced account data, which lags behind a write until the next sync.
+            val written = reactionNotificationsWritten
+            if (written == null || written == synced) {
+                reactionNotificationsWritten = null
+                synced
+            } else {
+                written
+            }
+        }
+    }
+
+    override suspend fun setReactionNotificationsEnabled(enabled: Boolean): Result<Unit> = withContext(dispatchers.io) {
+        runCatchingExceptions {
+            notificationSettings.await().setCustomPushRule(
+                ruleId = ReactionPushRule.RULE_ID,
+                ruleKind = RuleKind.Override,
+                actions = ReactionPushRule.actions(enabled),
+                conditions = ReactionPushRule.conditions,
+            )
+            reactionNotificationsWritten = enabled
         }
     }
 

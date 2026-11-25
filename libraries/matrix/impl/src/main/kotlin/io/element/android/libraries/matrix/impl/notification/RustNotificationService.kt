@@ -13,17 +13,27 @@ import io.element.android.libraries.core.extensions.runCatchingExceptions
 import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.matrix.api.core.SessionId
+import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.exception.NotificationResolverException
+import io.element.android.libraries.matrix.api.exception.isNetworkError
 import io.element.android.libraries.matrix.api.notification.GetNotificationDataResult
+import io.element.android.libraries.matrix.api.notification.NotificationContent
+import io.element.android.libraries.matrix.api.notification.NotificationData
 import io.element.android.libraries.matrix.api.notification.NotificationService
+import io.element.android.libraries.matrix.impl.exception.mapClientException
 import io.element.android.services.toolbox.api.systemclock.SystemClock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.matrix.rustcomponents.sdk.BatchNotificationResult
 import org.matrix.rustcomponents.sdk.NotificationClient
 import org.matrix.rustcomponents.sdk.NotificationItemsRequest
 import org.matrix.rustcomponents.sdk.NotificationStatus
 import org.matrix.rustcomponents.sdk.use
 import timber.log.Timber
+import kotlin.time.Duration.Companion.seconds
+
+// 2ecure: how long a reaction waits for the message it reacts to, so it doesn't hold up the other notifications.
+private val REACTED_EVENT_TIMEOUT = 10.seconds
 
 class RustNotificationService(
     private val sessionId: SessionId,
@@ -32,6 +42,7 @@ class RustNotificationService(
     clock: SystemClock,
 ) : NotificationService {
     private val notificationMapper: NotificationMapper = NotificationMapper(clock)
+    private val timelineEventMapper = TimelineEventToNotificationContentMapper()
 
     override suspend fun getNotifications(
         ids: Map<RoomId, List<EventId>>
@@ -55,6 +66,7 @@ class RustNotificationService(
                                 when (val status = result.status) {
                                     is NotificationStatus.Event -> {
                                         val result = notificationMapper.map(sessionId, eventId, roomId, status.item)
+                                            .fold(onSuccess = { it.withReactedEvent(roomId) }, onFailure = { Result.failure(it) })
                                         result.onFailure { Timber.e(it, "Could not map notification event $eventId") }
                                         put(eventId, result)
                                     }
@@ -91,6 +103,41 @@ class RustNotificationService(
                 }
             }
         }
+    }
+
+    /**
+     * 2ecure: a reaction only gets through the push rules when the account turned on notifications for reactions to its
+     * own messages. Whether to show it, and what to show, depends on the message reacted to: who sent it and what it
+     * said. Loaded from the event cache, or else from the server, for at most [REACTED_EVENT_TIMEOUT]; without it the
+     * reaction stays as it is (and isn't shown). A network error fails the item, so the push is tried again later.
+     */
+    private suspend fun NotificationData.withReactedEvent(roomId: RoomId): Result<NotificationData> {
+        val reaction = content as? NotificationContent.MessageLike.ReactionContent ?: return Result.success(this)
+        // Own reactions are never shown: nothing to load.
+        if (reaction.senderId == null || reaction.senderId == sessionId) return Result.success(this)
+        val reactedEvent = runCatchingExceptions {
+            withTimeoutOrNull(REACTED_EVENT_TIMEOUT) {
+                notificationClient.getRoom(roomId.value)?.use { room ->
+                    val event = room.loadOrFetchEvent(reaction.relatedEventId)
+                    val senderId = runCatchingExceptions { UserId(event.senderId()) }
+                    // The mapper closes the event.
+                    val content = timelineEventMapper.map(event).getOrNull()
+                    senderId.getOrThrow() to content
+                }
+            }
+        }
+        reactedEvent.exceptionOrNull()?.let { error ->
+            val clientException = error.mapClientException()
+            if (clientException.isNetworkError()) {
+                Timber.w("Network error while loading the event reacted to by $eventId, trying again later")
+                return Result.failure(clientException)
+            }
+            Timber.w(error, "Could not load the event reacted to by $eventId")
+        }
+        val (relatedEventSenderId, relatedEventContent) = reactedEvent.getOrNull() ?: return Result.success(this)
+        return Result.success(
+            copy(content = reaction.copy(relatedEventSenderId = relatedEventSenderId, relatedEventContent = relatedEventContent))
+        )
     }
 
     fun close() {

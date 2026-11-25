@@ -12,11 +12,15 @@ import org.matrix.rustcomponents.sdk.BatchNotificationResult
 import org.matrix.rustcomponents.sdk.NoHandle
 import org.matrix.rustcomponents.sdk.NotificationClient
 import org.matrix.rustcomponents.sdk.NotificationItemsRequest
+import org.matrix.rustcomponents.sdk.Room
 
 class FakeFfiNotificationClient(
     var notificationItemResult: Map<String, BatchNotificationResult> = emptyMap(),
-    val closeResult: () -> Unit = { }
+    val closeResult: () -> Unit = { },
+    val getRoomResult: (String) -> Room? = { null },
 ) : NotificationClient(NoHandle) {
+    override fun getRoom(roomId: String): Room? = getRoomResult(roomId)
+
     override suspend fun getNotifications(requests: List<NotificationItemsRequest>): Map<String, BatchNotificationResult> {
         return notificationItemResult
     }

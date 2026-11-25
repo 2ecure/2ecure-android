@@ -26,6 +26,7 @@ import org.matrix.rustcomponents.sdk.RoomInfo
 import org.matrix.rustcomponents.sdk.RoomInfoListener
 import org.matrix.rustcomponents.sdk.RoomMembersIterator
 import org.matrix.rustcomponents.sdk.TaskHandle
+import org.matrix.rustcomponents.sdk.TimelineEvent
 import uniffi.matrix_sdk.RoomMemberRole
 
 @OptIn(DelicateCoroutinesApi::class)
@@ -38,6 +39,7 @@ class FakeFfiRoom(
     private val suggestedRoleForUserLambda: (String) -> RoomMemberRole = { lambdaError() },
     private val roomInfo: RoomInfo = aRustRoomInfo(id = roomId.value),
     private val testScope: CoroutineScope = GlobalScope,
+    private val loadOrFetchEventLambda: (String) -> TimelineEvent = { lambdaError() },
 ) : Room(NoHandle) {
     override fun id(): String {
         return roomId.value
@@ -65,6 +67,10 @@ class FakeFfiRoom(
 
     override suspend fun suggestedRoleForUser(userId: String): RoomMemberRole {
         return suggestedRoleForUserLambda(userId)
+    }
+
+    override suspend fun loadOrFetchEvent(eventId: String): TimelineEvent {
+        return loadOrFetchEventLambda(eventId)
     }
 
     private var roomInfoUpdatesFlow = MutableStateFlow(roomInfo)

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 2ecure: privacy and online status (docs/privacy.md). -->
+<!-- 2ecure: privacy and online status (docs/privacy.md), reactions to your messages (docs/reaction-notifications.md). -->
 <resources>
     <string name="twoecure_privacy_choice_title">Qui peut vous trouver ?</string>
     <string name="twoecure_privacy_choice_message">Choisissez qui vous trouve dans la recherche en commençant une nouvelle discussion.</string>
@@ -13,4 +13,10 @@
     <string name="twoecure_presence_online">En ligne</string>
     <string name="twoecure_presence_last_seen">Dernière connexion %1$s</string>
     <string name="twoecure_presence_share_footer">Cela vaut aussi pour votre statut en ligne : désactivé, personne ne voit si vous êtes en ligne, et vous ne le voyez pas non plus pour les autres.</string>
+    <!-- Reactions to your messages (push rule com.2ecure.reactions). -->
+    <string name="twoecure_notification_settings_reactions">Réactions à vos messages</string>
+    <string name="twoecure_notification_reaction_with_quote">A réagi %1$s à votre message : « %2$s »</string>
+    <string name="twoecure_notification_reaction">A réagi %1$s à votre message</string>
+    <string name="twoecure_notification_reaction_no_key_with_quote">A réagi à votre message : « %1$s »</string>
+    <string name="twoecure_notification_reaction_no_key">A réagi à votre message</string>
 </resources>

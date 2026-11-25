@@ -70,7 +70,13 @@ sealed interface NotificationContent {
         data object KeyVerificationMac : MessageLike
         data object KeyVerificationDone : MessageLike
         data class ReactionContent(
-            val relatedEventId: String
+            val relatedEventId: String,
+            // 2ecure: who reacted and with what, and the message reacted to (its sender and content) when it could be loaded.
+            // A reaction only gets this far when the account turned on notifications for reactions to its own messages.
+            val senderId: UserId? = null,
+            val key: String? = null,
+            val relatedEventSenderId: UserId? = null,
+            val relatedEventContent: NotificationContent? = null,
         ) : MessageLike
 
         data object RoomEncrypted : MessageLike

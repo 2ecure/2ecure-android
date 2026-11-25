@@ -103,6 +103,7 @@ fun NotificationSettingsView(
                 // TODO We are removing the call notification toggle until support for call notifications has been added
                 // onCallsNotificationsChanged = { state.eventSink(NotificationSettingsEvent.SetCallNotificationsEnabled(it)) },
                 onInviteForMeNotificationsChange = { state.eventSink(NotificationSettingsEvent.SetInviteForMeNotificationsEnabled(it)) },
+                onReactionNotificationsChange = { state.eventSink(NotificationSettingsEvent.SetReactionNotificationsEnabled(it)) },
                 onTroubleshootNotificationsClick = onTroubleshootNotificationsClick,
             )
         }
@@ -126,6 +127,7 @@ private fun NotificationSettingsContentView(
     // TODO We are removing the call notification toggle until support for call notifications has been added
     // onCallsNotificationsChanged: (Boolean) -> Unit,
     onInviteForMeNotificationsChange: (Boolean) -> Unit,
+    onReactionNotificationsChange: (Boolean) -> Unit,
     onTroubleshootNotificationsClick: () -> Unit,
 ) {
     val systemSettings: NotificationSettingsState.AppSettings = state.appSettings
@@ -150,6 +152,7 @@ private fun NotificationSettingsContentView(
             onDirectChatsClick = onDirectChatsClick,
             onInviteForMeNotificationsChange = onInviteForMeNotificationsChange,
             onMentionNotificationsChange = onMentionNotificationsChange,
+            onReactionNotificationsChange = onReactionNotificationsChange,
         )
         ActivityCategory(
             showAllActivityInRoomList = state.showAllActivityInRoomList,
@@ -230,6 +233,7 @@ private fun NotificationsCategory(
     onDirectChatsClick: () -> Unit,
     onInviteForMeNotificationsChange: (Boolean) -> Unit,
     onMentionNotificationsChange: (Boolean) -> Unit,
+    onReactionNotificationsChange: (Boolean) -> Unit,
 ) {
     PreferenceCategory(title = stringResource(id = R.string.screen_notification_settings_notification_section_title)) {
         ListItem(
@@ -259,6 +263,12 @@ private fun NotificationsCategory(
             title = stringResource(id = R.string.screen_notification_settings_room_mention_label),
             isChecked = matrixSettings.atRoomNotificationsEnabled,
             onCheckedChange = onMentionNotificationsChange
+        )
+        // 2ecure: someone else's reaction to one of your messages.
+        PreferenceSwitch(
+            title = stringResource(id = CommonStrings.twoecure_notification_settings_reactions),
+            isChecked = matrixSettings.reactionNotificationsEnabled,
+            onCheckedChange = onReactionNotificationsChange
         )
     }
 }

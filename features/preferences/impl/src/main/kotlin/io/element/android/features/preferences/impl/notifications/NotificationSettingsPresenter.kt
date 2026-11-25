@@ -221,6 +221,9 @@ class NotificationSettingsPresenter(
                 is NotificationSettingsEvent.SetInviteForMeNotificationsEnabled -> {
                     localCoroutineScope.setInviteForMeNotificationsEnabled(event.enabled, changeNotificationSettingAction)
                 }
+                is NotificationSettingsEvent.SetReactionNotificationsEnabled -> {
+                    localCoroutineScope.setReactionNotificationsEnabled(event.enabled, changeNotificationSettingAction, matrixSettings)
+                }
                 is NotificationSettingsEvent.SetNotificationsEnabled -> sessionCoroutineScope.setNotificationsEnabled(userPushStore, event.enabled)
                 NotificationSettingsEvent.ClearConfigurationMismatchError -> {
                     matrixSettings.value = NotificationSettingsState.MatrixSettings.Invalid(fixFailed = false)
@@ -471,11 +474,13 @@ class NotificationSettingsPresenter(
         val callNotificationsEnabled = notificationSettingsService.isCallEnabled().getOrThrow()
         val atRoomNotificationsEnabled = notificationSettingsService.isRoomMentionEnabled().getOrThrow()
         val inviteForMeNotificationsEnabled = notificationSettingsService.isInviteForMeEnabled().getOrThrow()
+        val reactionNotificationsEnabled = notificationSettingsService.isReactionNotificationsEnabled().getOrDefault(false)
 
         target.value = NotificationSettingsState.MatrixSettings.Valid(
             atRoomNotificationsEnabled = atRoomNotificationsEnabled,
             callNotificationsEnabled = callNotificationsEnabled,
             inviteForMeNotificationsEnabled = inviteForMeNotificationsEnabled,
+            reactionNotificationsEnabled = reactionNotificationsEnabled,
             defaultGroupNotificationMode = encryptedGroupDefaultMode,
             defaultOneToOneNotificationMode = encryptedOneToOneDefaultMode,
         )
@@ -527,6 +532,21 @@ class NotificationSettingsPresenter(
     private fun CoroutineScope.setInviteForMeNotificationsEnabled(enabled: Boolean, action: MutableState<AsyncAction<Unit>>) = launch {
         action.runUpdatingStateNoSuccess {
             notificationSettingsService.setInviteForMeEnabled(enabled)
+        }
+    }
+
+    // 2ecure: the switch shows the written value at once; the synced push rules confirm it later.
+    private fun CoroutineScope.setReactionNotificationsEnabled(
+        enabled: Boolean,
+        action: MutableState<AsyncAction<Unit>>,
+        target: MutableState<NotificationSettingsState.MatrixSettings>,
+    ) = launch {
+        action.runUpdatingStateNoSuccess {
+            notificationSettingsService.setReactionNotificationsEnabled(enabled)
+        }.onSuccess {
+            (target.value as? NotificationSettingsState.MatrixSettings.Valid)?.let {
+                target.value = it.copy(reactionNotificationsEnabled = enabled)
+            }
         }
     }
 

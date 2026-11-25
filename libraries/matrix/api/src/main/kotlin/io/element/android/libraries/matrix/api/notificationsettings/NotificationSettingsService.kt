@@ -113,6 +113,19 @@ interface NotificationSettingsService {
      */
     suspend fun setInviteForMeEnabled(enabled: Boolean): Result<Unit>
 
+    /**
+     * 2ecure: whether someone else's reaction to one of your messages generates a notification (push rule
+     * `com.2ecure.reactions`, docs/reaction-notifications.md). Off when the account never turned it on.
+     */
+    suspend fun isReactionNotificationsEnabled(): Result<Boolean>
+
+    /**
+     * 2ecure: turns notifications for reactions to your messages on or off, for all of the account's devices.
+     *
+     * @param enabled true to be notified when someone reacts to one of your messages.
+     */
+    suspend fun setReactionNotificationsEnabled(enabled: Boolean): Result<Unit>
+
     /** The rooms that have an enabled rule of their own rather than following the defaults. */
     suspend fun getRoomsWithUserDefinedRules(): Result<List<RoomId>>
 

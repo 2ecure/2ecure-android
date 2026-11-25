@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 2ecure: privacy and online status (docs/privacy.md). -->
+<!-- 2ecure: privacy and online status (docs/privacy.md), reactions to your messages (docs/reaction-notifications.md). -->
 <resources>
     <string name="twoecure_privacy_choice_title">Who can find you?</string>
     <string name="twoecure_privacy_choice_message">Choose who finds you in search when they start a new chat.</string>
@@ -13,4 +13,10 @@
     <string name="twoecure_presence_online">Online</string>
     <string name="twoecure_presence_last_seen">Last seen %1$s</string>
     <string name="twoecure_presence_share_footer">This also covers your online status: with it off, nobody sees whether you are online, and you don’t see it for others either.</string>
+    <!-- Reactions to your messages (push rule com.2ecure.reactions). -->
+    <string name="twoecure_notification_settings_reactions">Reactions to your messages</string>
+    <string name="twoecure_notification_reaction_with_quote">Reacted %1$s to your message: “%2$s”</string>
+    <string name="twoecure_notification_reaction">Reacted %1$s to your message</string>
+    <string name="twoecure_notification_reaction_no_key_with_quote">Reacted to your message: “%1$s”</string>
+    <string name="twoecure_notification_reaction_no_key">Reacted to your message</string>
 </resources>

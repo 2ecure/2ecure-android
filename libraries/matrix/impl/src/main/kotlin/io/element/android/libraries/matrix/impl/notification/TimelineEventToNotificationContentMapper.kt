@@ -95,7 +95,7 @@ private fun MessageLikeEventContent.toContent(senderId: UserId): NotificationCon
             MessageLikeEventContent.KeyVerificationMac -> NotificationContent.MessageLike.KeyVerificationMac
             MessageLikeEventContent.KeyVerificationReady -> NotificationContent.MessageLike.KeyVerificationReady
             MessageLikeEventContent.KeyVerificationStart -> NotificationContent.MessageLike.KeyVerificationStart
-            is MessageLikeEventContent.ReactionContent -> NotificationContent.MessageLike.ReactionContent(relatedEventId)
+            is MessageLikeEventContent.ReactionContent -> NotificationContent.MessageLike.ReactionContent(relatedEventId, senderId = senderId)
             MessageLikeEventContent.RoomEncrypted -> NotificationContent.MessageLike.RoomEncrypted
             is MessageLikeEventContent.RoomMessage -> {
                 NotificationContent.MessageLike.RoomMessage(
